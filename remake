@@ -2,10 +2,13 @@
 
 if [ `uname` = 'Darwin' ]; then
     cat << EOM
-$0 should not be run on Darwin because it may generate
-.dylib files instead of .so files.
+Warning: Running $0 on Darwin may generate .dylib files instead of .so files.
 EOM
-    exit 1
+    printf "Continue? (y/[n]) "
+    read continue
+    if [ 0$continue != 0y ]; then
+	exit
+    fi
 fi
 
 printf "This will anihilate PLIST.  Are you sure? (y/n) "
@@ -18,8 +21,8 @@ if [ 0$resp = 0'y' ]; then
     fi
     ${make} distclean
     ${make} deinstall
-    # ${make} distinfo
-    ${make} makesum
+    rm -f distinfo
+    ${make} distinfo
     cat /dev/null > PLIST       # Send next install to temp area
     ${make} install
     ${make} print-PLIST > PLIST   # Send next install to real install tree
