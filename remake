@@ -11,7 +11,13 @@ EOM
     fi
 fi
 
-printf "This will anihilate PLIST.  Are you sure? (y/n) "
+if [ -e PLIST.`uname -s` ]; then
+    plist=PLIST.`uname -s`
+else
+    plist=PLIST
+fi
+
+printf "This will anihilate $plist.  Are you sure? (y/n) "
 read resp
 if [ 0$resp = 0'y' ]; then
     if [ `uname` = 'NetBSD' ]; then
@@ -23,9 +29,9 @@ if [ 0$resp = 0'y' ]; then
     ${make} deinstall
     rm -f distinfo
     ${make} distinfo
-    cat /dev/null > PLIST       # Send next install to temp area
+    cat /dev/null > $plist       # Send next install to temp area
     ${make} install
-    ${make} print-PLIST > PLIST   # Send next install to real install tree
+    ${make} print-PLIST > $plist   # Send next install to real install tree
     ${make} clean
     ${make} deinstall
     ${make} install
