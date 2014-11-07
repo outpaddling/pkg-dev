@@ -17,9 +17,15 @@ else
     plist=PLIST
 fi
 
-printf "This will anihilate $plist.  Are you sure? (y/n) "
+printf "This will anihilate $plist.  Are you sure? (y/[n]) "
 read resp
 if [ 0$resp = 0'y' ]; then
+    if [ -d CVS ]; then
+	cvs up -dP
+    elif [ -d .svn ]; then
+	svn up
+    fi
+
     if [ `uname` = 'NetBSD' ]; then
 	make='make'
     else
@@ -32,8 +38,15 @@ if [ 0$resp = 0'y' ]; then
     cat /dev/null > $plist       # Send next install to temp area
     ${make} install
     ${make} print-PLIST > $plist   # Send next install to real install tree
+    vi $plist
     ${make} clean
     ${make} deinstall
     ${make} install
+
+    if [ -d CVS ]; then
+	cvs ci
+    elif [ -d .svn ]; then
+	svn ci
+    fi
 fi
 
