@@ -1,0 +1,40 @@
+#!/bin/sh
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2015-04-24  Jasson BaconBegin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 prefix [grep flags] pattern\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# -lt 2 ]; then
+    usage
+fi
+
+prefix=$1
+shift
+
+if [ -d $prefix ]; then
+    for category in $prefix/*; do
+	if [ -e $category/Makefile ] && [ $category != /usr/ports/Templates ]; then
+	    grep $@ $category/*/Makefile
+	fi
+    done
+fi
+

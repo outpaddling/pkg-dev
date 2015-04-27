@@ -1,0 +1,33 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2014-11-21  root        Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 prefix pkgname\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 2 ]; then
+    usage
+fi
+
+prefix=$1
+pkg=$2
+gunzip -c $prefix/var/db/pkg/pkg-vulnerabilities | fgrep $pkg
+
