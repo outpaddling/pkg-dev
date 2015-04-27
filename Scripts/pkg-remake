@@ -46,7 +46,9 @@ if [ 0$resp = 0'y' ]; then
     if [ -d CVS ]; then
 	cvs ci
     elif [ -d ../.svn ]; then
-	svn ci
+	printf 'Commit message? '
+	read message
+	svn ci -m "$message"
     fi
 fi
 
