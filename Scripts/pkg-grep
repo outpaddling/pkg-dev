@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 ##########################################################################
 #   Script description:
@@ -9,12 +9,12 @@
 #       
 #   History:
 #   Date        Name        Modification
-#   2015-04-24  Jasson BaconBegin
+#   2015-04-20  Jason Bacon Begin
 ##########################################################################
 
 usage()
 {
-    printf "Usage: $0 prefix [grep flags] pattern\n"
+    printf "Usage: $0 [-p prefix] [grep flags] [filename] regular-expression\n"
     exit 1
 }
 
@@ -23,18 +23,39 @@ usage()
 #   Main
 ##########################################################################
 
-if [ $# -lt 2 ]; then
-    usage
-fi
+prefix=/usr/pkgsrc
+while [ 0`echo $1 | cut -c 1-1` = 0'-' ]; do
+    if [ $1 = '-p' ]; then
+	prefix=$2
+	shift
+	shift
+    else
+	grep_flags="$grep_flags $1"
+	shift
+    fi
+done
 
-prefix=$1
-shift
+# echo $prefix $grep_flags
 
-if [ -d $prefix ]; then
-    for category in $prefix/*; do
-	if [ -e $category/Makefile ] && [ $category != /usr/ports/Templates ]; then
-	    grep $@ $category/*/Makefile
-	fi
-    done
-fi
+case $# in
+    1)
+	filename='Makefile'
+	re="$1"
+	;;
+    2)
+	filename="$1"
+	re="$2"
+	;;
+    *)
+	usage
+	;;
+esac
+
+set +e
+cd $prefix
+for category in *; do
+    if [ -e $category/Makefile ]; then
+	grep $grep_flags "$re" $category/*/$filename
+    fi
+done
 
