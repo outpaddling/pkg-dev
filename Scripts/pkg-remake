@@ -31,7 +31,9 @@ else
 fi
 
 printf "Regenerate $plist? (y/[n]) "
-read resp
+read regen_plist
+printf "Remove distfile? (y/[n]) "
+read remove_distfile
 
 if [ -d CVS ]; then
     cvs up -dP
@@ -44,13 +46,19 @@ if [ `uname` = 'NetBSD' ]; then
 else
     make='bmake'
 fi
-${make} distclean
+
+if [ 0$remove_distfile = 0y ]; then
+    ${make} distclean
+else
+    ${make} clean
+fi
+
 ${make} deinstall
 pause
 rm -f distinfo
 ${make} distinfo
 
-if [ 0$resp = 0'y' ]; then
+if [ 0$regen_plist = 0'y' ]; then
     cat /dev/null > $plist       # Send next install to temp area
     ${make} install
     ${make} print-PLIST > $plist   # Send next install to real install tree
