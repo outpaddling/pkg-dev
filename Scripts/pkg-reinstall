@@ -14,7 +14,14 @@ fi
 if [ $# = 1 ]; then
     cd $1
 fi
+
+printf "Remove distfile? y/[n] "
+read remove
 $make deinstall
-$make distclean
+if [ 0$remove = 0y ]; then
+    $make distclean
+else
+    $make clean
+fi
 $make install
 
