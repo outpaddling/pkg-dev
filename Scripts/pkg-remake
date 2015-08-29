@@ -59,12 +59,22 @@ rm -f distinfo
 ${make} distinfo
 
 if [ 0$regen_plist = 0'y' ]; then
-    cat /dev/null > $plist       # Send next install to temp area
+    cp $plist $plist.old
+    printf '\n' > $plist       # Send next install to temp area
     ${make} install
-    ${make} print-PLIST > $plist   # Send next install to real install tree
+    ${make} print-PLIST > $plist
+    if diff -u $plist.old $plist; then
+	printf "No changes to $plist\n"
+    fi
+    pause
     vi $plist
     ${make} clean
     ${make} deinstall
+    printf "Remove $plist.old? y/[n] "
+    read remove
+    if [ 0$remove = 0y ]; then
+	rm -f $plist.old
+    fi
 fi
 
 ${make} install
