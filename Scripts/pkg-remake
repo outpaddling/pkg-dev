@@ -41,10 +41,10 @@ elif [ -d ../.svn ]; then
     svn up
 fi
 
-if [ `uname` = 'NetBSD' ]; then
-    make='make'
-else
+if which bmake; then
     make='bmake'
+else
+    make='make'
 fi
 
 if [ 0$remove_distfile = 0y ]; then
@@ -60,8 +60,8 @@ ${make} distinfo
 
 if [ 0$regen_plist = 0'y' ]; then
     cp $plist $plist.old
-    printf '\n' > $plist       # Send next install to temp area
-    ${make} install
+    # Fails if PLIST is off and PKG_DEVELOPER=yes
+    ${make} install || true
     ${make} print-PLIST > $plist
     if diff -u $plist.old $plist; then
 	printf "No changes to $plist\n"
