@@ -14,7 +14,7 @@
 
 usage()
 {
-    printf "Usage: $0 [-p prefix] [grep flags] [filename] regular-expression\n"
+    printf "Usage: $0 [-p prefix] [grep flags] [grep flags] regular-expression\n"
     exit 1
 }
 
@@ -55,6 +55,7 @@ set +e
 cd $prefix
 for category in *; do
     if [ -e $category/Makefile ]; then
+	printf "Searching $category...\n"
 	grep $grep_flags "$re" $category/*/$filename
     fi
 done
