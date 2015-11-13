@@ -30,8 +30,6 @@ else
     plist=PLIST
 fi
 
-printf "Regenerate $plist? (y/[n]) "
-read regen_plist
 printf "Remove distfile? (y/[n]) "
 read remove_distfile
 
@@ -57,6 +55,9 @@ ${make} deinstall
 pause
 rm -f distinfo
 ${make} distinfo
+
+printf "Regenerate $plist? (y/[n]) "
+read regen_plist
 
 if [ 0$regen_plist = 0'y' ]; then
     cp $plist $plist.old
