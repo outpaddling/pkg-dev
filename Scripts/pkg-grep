@@ -58,8 +58,9 @@ if [ $# -lt 1 ]; then
     usage
 fi
 
-# echo $prefix $grep_flags
 re="$1"
+shift
+grep_flags="$@"
 
 set +e
 cd $prefix
