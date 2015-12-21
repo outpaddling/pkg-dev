@@ -60,8 +60,12 @@ printf "Regenerate $plist? (y/[n]) "
 read regen_plist
 
 if [ 0$regen_plist = 0'y' ]; then
-    mv -f $plist $plist.old
-    ${make} install
+    if [ -e $plist ] && [ ! -e $plist.old ]; then
+	mv -f $plist $plist.old
+    fi
+    printf '@comment $NetBSD$\n' > PLIST
+    # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
+    ${make} install || true
     ${make} print-PLIST > $plist
     if diff -u $plist.old $plist; then
 	printf "No changes to $plist\n"
