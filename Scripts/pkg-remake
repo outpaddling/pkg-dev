@@ -60,9 +60,8 @@ printf "Regenerate $plist? (y/[n]) "
 read regen_plist
 
 if [ 0$regen_plist = 0'y' ]; then
-    cp $plist $plist.old
-    # Fails if PLIST is off and PKG_DEVELOPER=yes
-    ${make} install || true
+    mv -f $plist $plist.old
+    ${make} install
     ${make} print-PLIST > $plist
     if diff -u $plist.old $plist; then
 	printf "No changes to $plist\n"
