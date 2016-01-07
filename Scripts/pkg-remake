@@ -13,6 +13,10 @@ pause()
     read junk
 }
 
+if [ -z EDITOR ]; then
+    EDITOR=vi
+fi
+
 if [ `uname` = 'Darwin' ]; then
     cat << EOM
 Warning: Running $0 on Darwin may generate .dylib files instead of .so files.
@@ -67,11 +71,12 @@ if [ 0$regen_plist = 0'y' ]; then
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
     ${make} install || true
     ${make} print-PLIST > $plist
+    pause
+    $EDITOR $plist
     if diff -u $plist.old $plist; then
 	printf "No changes to $plist\n"
     fi
     pause
-    vi $plist
     ${make} clean
     ${make} deinstall
     printf "Remove $plist.old? y/[n] "
