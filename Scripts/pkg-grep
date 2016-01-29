@@ -65,7 +65,7 @@ grep_flags="$@"
 set +e
 cd $prefix
 for category in *; do
-    if [ -e $category/$filename ] && [ $category != Templates ]; then
+    if [ -e $category/Makefile ] && [ $category != Templates ]; then
 	printf "Searching $category...\n"
 	grep $grep_flags "$re" $category/*/$filename
     fi
