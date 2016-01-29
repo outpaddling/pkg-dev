@@ -17,11 +17,13 @@ fi
 
 printf "Remove distfile? y/[n] "
 read remove
-$make deinstall
 if [ 0$remove = 0y ]; then
     $make distclean
 else
     $make clean
 fi
+# Rebuild before deinstalling to minimize uninstalled time
+$make
+$make deinstall
 $make install
 
