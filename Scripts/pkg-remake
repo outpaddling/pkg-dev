@@ -55,7 +55,6 @@ else
     ${make} clean
 fi
 
-${make} deinstall
 pause
 rm -f distinfo
 ${make} distinfo
@@ -63,11 +62,13 @@ ${make} distinfo
 printf "Regenerate $plist? (y/[n]) "
 read regen_plist
 
+# deinstall as late as possible to minimize uninstalled time
 if [ 0$regen_plist = 0'y' ]; then
     if [ -e $plist ] && [ ! -e $plist.old ]; then
 	mv -f $plist $plist.old
     fi
     printf '@comment $NetBSD$\n' > PLIST
+    ${make} deinstall
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
     ${make} install || true
     ${make} print-PLIST > $plist
@@ -86,6 +87,7 @@ if [ 0$regen_plist = 0'y' ]; then
     fi
 fi
 
+${make} deinstall
 ${make} install
 
 if [ -d CVS ]; then
