@@ -13,7 +13,7 @@ pause()
     read junk
 }
 
-if [ -z EDITOR ]; then
+if [ -z $EDITOR ]; then
     EDITOR=vi
 fi
 
