@@ -26,6 +26,10 @@ usage()
 case $# in
 0)
     category=`awk '$1 == "CATEGORIES=" { print $2 }' Makefile`
+    if [ -z $category ]; then
+	printf "No category found in Makefile.  Specify one using $0 category.\n"
+	exit 1
+    fi
     ;;
 1)
     category=$1
