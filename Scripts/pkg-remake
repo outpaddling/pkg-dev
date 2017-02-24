@@ -55,7 +55,6 @@ else
     ${make} clean
 fi
 
-pause
 rm -f distinfo
 ${make} distinfo
 
@@ -68,9 +67,11 @@ if [ 0$regen_plist = 0'y' ]; then
 	mv -f $plist $plist.old
     fi
     printf '@comment $NetBSD$\n' > PLIST
-    ${make} deinstall
+    if ${make} deinstall 2>&1 | fgrep 'still required'; then
+	exit 1
+    fi
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
-    ${make} install || true
+    ${make} stage-install || true
     ${make} print-PLIST > $plist
     pause
     $EDITOR $plist
@@ -85,9 +86,9 @@ if [ 0$regen_plist = 0'y' ]; then
     if [ 0$remove = 0y ]; then
 	rm -f $plist.old
     fi
+elif ${make} deinstall 2>&1 | fgrep 'still required'; then
+    exit 1
 fi
-
-${make} deinstall
 ${make} install
 
 if [ -d CVS ]; then
