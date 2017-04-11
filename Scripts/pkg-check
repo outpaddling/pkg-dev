@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+
+##########################################################################
+#   Function description:
+#       Pause until user presses return
+##########################################################################
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+printf "Remove distfile? y/[n] "
+read distclean
+if [ 0$distclean = 0y ]; then
+    bmake distclean
+else
+    bmake clean
+fi
+pkglint -e
+pause
+bmake deinstall
+bmake install

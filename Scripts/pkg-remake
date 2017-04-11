@@ -89,11 +89,22 @@ if [ 0$regen_plist = 0'y' ]; then
 elif ${make} deinstall 2>&1 | fgrep 'still required'; then
     exit 1
 fi
-${make} install
 
-if [ -d CVS ]; then
-    cvs ci
-elif [ -d ../.svn ]; then
-    svn ci -m "pkg-remake"
+cat << EOM
+
+===========================================================================
+Running pkg-check...
+===========================================================================
+
+EOM
+pkg-check
+
+printf "Commit changes to package? y/[n] "
+read commit
+if [ 0$commit = 0y ]; then
+    if [ -d CVS ]; then
+	cvs ci
+    elif [ -d ../.svn ]; then
+	svn ci -m "pkg-remake"
+    fi
 fi
-
