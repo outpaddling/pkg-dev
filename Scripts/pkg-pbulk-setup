@@ -54,9 +54,14 @@ pbulk_dir=`auto-ask pbulk-dir 'Sandbox directory?' $prefix/pbulk`
 
 rsync_user=`auto-ask rsync-user 'rsync username (leave blank if you do not want to upload packages)?' ''`
 if [ 0$rsync_user != 0 ]; then
+    if [ -e /etc/redhat-release ]; then
+	os=RHEL$(cut -d ' ' -f 4 /etc/redhat-release | cut -d '.' -f 1)
+    else
+	os=$(uname)$(uname -r | cut -d '.' -f 1)
+    fi
     rsync_host=`auto-ask rsync-host 'rsync hostname?' ''`
-    rsync_pkg_dir=`auto-ask rsync-pkg-dir 'rsync pkg directory?' "www/pkgsrc/packages$prefix/RHEL6"`
-    rsync_report_dir=`auto-ask rsync-report-dir 'rsync report directory?' "www/pkgsrc/reports$prefix/RHEL6"`
+    rsync_pkg_dir=`auto-ask rsync-pkg-dir 'rsync pkg directory?' "www/pkgsrc/packages$prefix/$os"`
+    rsync_report_dir=`auto-ask rsync-report-dir 'rsync report directory?' "www/pkgsrc/reports$prefix/$os"`
 fi
 
 # Set up env for this tree
@@ -231,6 +236,6 @@ chroot $pbulk_dir /bin/sh
 Then edit /usr/pbulk/etc/pbulk.conf and /usr/pbulk/etc/pbulk.list to taste 
 and finally run
 
-$pbulk_dir/bin/bulkbuild
+/usr/pbulk/bin/bulkbuild
 
 EOM
