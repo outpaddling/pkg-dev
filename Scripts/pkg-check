@@ -21,7 +21,7 @@ if [ 0$distclean = 0y ]; then
 else
     bmake clean
 fi
-pkglint -e
+pkglint -e || true
 pause
 bmake deinstall
 bmake install
