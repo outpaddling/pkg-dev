@@ -55,7 +55,10 @@ pbulk_dir=`auto-ask pbulk-dir 'Sandbox directory?' $prefix/pbulk`
 rsync_user=`auto-ask rsync-user 'rsync username (leave blank if you do not want to upload packages)?' ''`
 if [ 0$rsync_user != 0 ]; then
     if [ -e /etc/redhat-release ]; then
-	os=RHEL$(cut -d ' ' -f 4 /etc/redhat-release | cut -d '.' -f 1)
+	release=`cat /etc/redhat-release`
+	release=${release%%.*}
+	release=${release##*release }
+	os=RHEL$release
     else
 	os=$(uname)$(uname -r | cut -d '.' -f 1)
     fi
