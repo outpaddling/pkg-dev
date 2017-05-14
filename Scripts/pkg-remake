@@ -67,7 +67,8 @@ if [ 0$regen_plist = 0'y' ]; then
 	mv -f $plist $plist.old
     fi
     printf '@comment $NetBSD$\n' > PLIST
-    if ${make} deinstall 2>&1 | fgrep 'still required'; then
+    if ${make} deinstall 2>&1 | fgrep -q 'still required'; then
+	${make} deinstall
 	exit 1
     fi
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
@@ -86,7 +87,8 @@ if [ 0$regen_plist = 0'y' ]; then
     if [ 0$remove = 0y ]; then
 	rm -f $plist.old
     fi
-elif ${make} deinstall 2>&1 | fgrep 'still required'; then
+elif ${make} deinstall 2>&1 | fgrep -q 'still required'; then
+    ${make} deinstall
     exit 1
 fi
 
