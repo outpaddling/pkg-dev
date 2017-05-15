@@ -99,6 +99,10 @@ fi
 mkdir -p $pbulk_dir/root
 cp -Rp /root/.ssh $pbulk_dir/root
 
+# Remove existing prefix.  It may not have been created by our bootstrap
+# script and therefore may not have the correct permissions and options.
+rm -rf $pbulk_dir$prefix
+
 # Generate mk.conf fragments
 # Redirect workdir or it will use the pkgsrc tree outside the chroot
 
