@@ -1,0 +1,45 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2017-05-13  root        Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 dir\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+dir=$1
+if [ ! -d $dir ]; then
+    printf "${dir}: No such directory.\n"
+    exit 1
+fi
+
+rm -rf $dir/proc $dir/dev
+mkdir $dir/proc $dir/dev
+mount --bind /proc $dir/proc
+mount --bind /dev $dir/dev
+cp -fp /etc/resolv.conf $dir/etc
+# Make sure umounts happen
+set +e
+chroot $dir /bin/bash
+umount $dir/dev
+umount $dir/proc
