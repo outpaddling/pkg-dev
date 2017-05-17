@@ -154,11 +154,13 @@ if [ 0$rsync_user != 0 ]; then
     rsync_report_dir=`auto_ask rsync-report-dir 'rsync report directory?' "www/pkgsrc/reports$prefix/$os"`
 fi
 
+pbulk_user=`auto_ask pbulk-user 'User to run pbulk builds?' pbulk`
+
 # Set up env for this tree
 PATH=/usr/bin:/usr/sbin:/bin:/sbin
 export PATH
 
-# Make sure pbulk user can access everything
+# Make sure $pbulk_user user can access everything
 umask 022
 
 # Copy root ssh in case keys are installed on rsync target
@@ -195,7 +197,7 @@ MAKE_JOBS=                  4
 WRKOBJDIR=                  /tmp/pkgbuild
 EOM
 
-cat << EOM > /bootstrap
+cat << EOM > /pbulk/bootstrap
 #!/bin/sh -e
 
 # Redirect workdir or it will use the pkgsrc tree outside the chroot
@@ -203,22 +205,22 @@ cat << EOM > /bootstrap
 # Install pbulk under a different prefix, since it wipes out the
 # package building prefix before each build.
 
-# Make sure pbulk user can access everything
+# Make sure $pbulk_user user can access everything
 umask 022
 
 # Create pbulk user
-useradd -c 'pbulk user' -m -s /bin/sh pbulk || true
+useradd -c 'pbulk user' -m -s /bin/sh $pbulk_user || true
 
-PATH=/usr/pbulk/bin:$PATH
+PATH=/pbulk/bin:$PATH
 export PATH
 
-if [ ! -e /usr/pbulk/bin/bmake ]; then
+if [ ! -e /pbulk/bin/bmake ]; then
     cd /sharedapps/pkgsrc-2017Q1/bootstrap
     ./bootstrap \\
 	--abi=64 \\
 	--make-jobs=4 \\
-	--prefix=/usr/pbulk \\
-	--varbase=/usr/pbulk/var \\
+	--prefix=/pbulk \\
+	--varbase=/pbulk/var \\
 	--prefer-pkgsrc=yes \\
 	--mk-fragment=/mk-pbulk.conf \\
 	--workdir=/tmp/pbulk-bootstrap
@@ -247,30 +249,30 @@ fi
 
 cd /
 mkdir -p bulklog
-chown -Rh pbulk:pbulk $prefix $pkgsrc/packages /tmp/pkgbuild
-tar zcvf /bootstrap.tar.gz .$prefix
+chown -Rh ${pbulk_user}:$pbulk_user $prefix $pkgsrc/packages /tmp/pkgbuild
+tar zcvf /pbulk/bootstrap.tar.gz .$prefix
 
 # Generate a pbulk.list file.  Users can add whatever packages they want
 # to this.
 
-cat << EOM2 > /usr/pbulk/etc/pbulk.list
+cat << EOM2 > /pbulk/etc/pbulk.list
 pkgtools/digest
 EOM2
 
 # Update pbulk.conf with some reasonable defaults for this build.
 
-cat << EOM2 >> /usr/pbulk/etc/pbulk.conf
+cat << EOM2 >> /pbulk/etc/pbulk.conf
 
 ##################################
 # Overrides from auto-pbulk-setup
 
-PATH=/usr/pbulk/bin:$PATH
+PATH=/pbulk/bin:$PATH
 export PATH
 
-bootstrapkit=/bootstrap.tar.gz
-limited_list=/usr/pbulk/etc/pbulk.list
+bootstrapkit=/pbulk/bootstrap.tar.gz
+limited_list=/pbulk/etc/pbulk.list
 reuse_scan_results=yes
-unprivileged_user=pbulk
+unprivileged_user=$pbulk_user
 make=$prefix/bin/bmake
 bulklog=/bulklog
 
@@ -297,20 +299,20 @@ EOM2
 EOM
 
 if [ 0$rsync_user != 0 ]; then
-    cat << EOM >> /bootstrap
-cat << EOM2 >> /usr/pbulk/etc/pbulk.conf
+    cat << EOM >> /pbulk/bootstrap
+cat << EOM2 >> /pbulk/etc/pbulk.conf
 pkg_rsync_target="$rsync_user@$rsync_host:$rsync_pkg_dir"
 report_rsync_target="$rsync_user@$rsync_host:$rsync_report_dir"
-rsync=/usr/pbulk/bin/rsync
+rsync=/pbulk/bin/rsync
 EOM2
 EOM
 else
-cat << EOM >> /bootstrap
-printf "rsync=:\n" >> /usr/pbulk/etc/pbulk.conf
+cat << EOM >> /pbulk/bootstrap
+printf "rsync=:\n" >> /pbulk/etc/pbulk.conf
 EOM
 fi
 
-chmod 755 /bootstrap
+chmod 755 /pbulk/bootstrap
 
 # Inform the user what to do next.
 
@@ -318,11 +320,11 @@ cat << EOM
 
 Now run
 
-./bootstrap
+/pbulk/bootstrap
 
-Then edit /usr/pbulk/etc/pbulk.conf and /usr/pbulk/etc/pbulk.list to taste 
+Then edit /pbulk/etc/pbulk.conf and /pbulk/etc/pbulk.list to taste 
 and finally run
 
-/usr/pbulk/bin/bulkbuild
+/pbulk/bin/bulkbuild
 
 EOM
