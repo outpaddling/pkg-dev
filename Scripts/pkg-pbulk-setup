@@ -109,37 +109,6 @@ $0 should only be run in a chroot, VM, or on a system that is
 dedicated exclusively to pbulk builds.  It will remove all installed
 packages and perform extensive reconfiguration of your system.
 
-To create a chroot directory, do one of the following:
-
-1.
-    a.  Install pkgtools/mksandbox.
-    b.  mkdir -p chroot-os-version
-	mksandbox --without-x --without-src chroot-os-version
-    c.  /path/to/chroot-os-version/sandbox mount
-
-2.  Perform a minimal OS installation and create a tarball to be unpacked
-    and used as the chroot env.  A virtual machine can be used for this.
-    
-    For CentOS/RHEL:
-    
-    a.  Install from the -minimal ISO image.
-    b.  Run the following in the new installation:
-	cd /
-	mkdir tar
-	tar zcvf tar/os-version.tgz \
-	    --exclude ./tar --exclude ./proc --exclude ./dev .
-    c.  Copy tar/os-version.tgz to a bare-metal installation of the same OS.
-    d.  Run the following on the bare-metal installation:
-	mkdir chroot-os-version
-	cd chroot-os-version
-	tar zxvf /path/to/os-version.tar.gz
-	cd ..
-	pkg-start-chroot /path/to/chroot-os-version
-    
-3.  Copy pkg-pbulk-setup to chroot-os-version.
-4.  Inside the sandbox, bootstrap a pkgsrc tree (e.g. using auto-pkgsrc-setup)
-    and then run pkg-pbulk-setup and follow the instructions on the screen.
-
 EOM
 
 printf "Continue? yes/[no] "
