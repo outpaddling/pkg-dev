@@ -197,6 +197,7 @@ MAKE_JOBS=                  4
 WRKOBJDIR=                  /tmp/pkgbuild
 EOM
 
+mkdir /pbulk
 cat << EOM > /pbulk/bootstrap
 #!/bin/sh -e
 
