@@ -33,13 +33,36 @@ if [ ! -d $dir ]; then
     exit 1
 fi
 
+case `uname` in
+Linux)
+    mount_cmd='mount --bind'
+    ;;
+NetBSD)
+    mount_cmd=mount_null
+    ;;
+*)
+    printf "`uname` is not yes supported.\n"
+    exit 1
+esac
+
 rm -rf $dir/proc $dir/dev
-mkdir $dir/proc $dir/dev
-mount --bind /proc $dir/proc
-mount --bind /dev $dir/dev
+mkdir -p $dir/proc $dir/dev
+$mount_cmd /proc $dir/proc
+$mount_cmd /dev $dir/dev
+if [ `uname` = NetBSD ]; then
+    rm -rf $dir/kern
+    mkdir $dir/kern
+    $mount_cmd /kern $dir/kern
+fi
 cp -fp /etc/resolv.conf $dir/etc
+
 # Make sure umounts happen
 set +e
-chroot $dir /bin/bash
+chroot $dir /bin/sh
+
+# Unmount in proper order
+if [ `uname` = NetBSD ]; then
+    umount $dir/kern
+fi
 umount $dir/dev
 umount $dir/proc

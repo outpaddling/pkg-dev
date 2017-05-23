@@ -139,6 +139,10 @@ fi
 
 prefix=`auto_ask bin-prefix 'Pkgsrc install prefix?' /usr/pkg`
 
+# pbulk_dir=`auto_ask pbulk-prefix 'Pbulk install prefix?' /usr/pbulk`
+
+make_jobs=`auto_ask make-jobs 'Max # processes for make to use?' 4`
+
 rsync_user=`auto_ask rsync-user 'rsync username (leave blank if you do not want to upload packages)?' ''`
 if [ 0$rsync_user != 0 ]; then
     if [ -e /etc/redhat-release ]; then
@@ -147,7 +151,7 @@ if [ 0$rsync_user != 0 ]; then
 	release=${release##*release }
 	os=RHEL$release
     else
-	os=$(uname)$(uname -r | cut -d '.' -f 1)
+	os=$(uname)-$(uname -r)
     fi
     rsync_host=`auto_ask rsync-host 'rsync hostname?' ''`
     rsync_pkg_dir=`auto_ask rsync-pkg-dir 'rsync pkg directory?' "www/pkgsrc/packages$prefix/$os"`
@@ -176,30 +180,36 @@ rm -rf $prefix
 cat << EOM > /mk-pbulk.conf
 #!/bin/sh -e
 
+# Written by $0
+
 SKIP_LICENSE_CHECK=         yes
 ALLOW_VULNERABLE_PACKAGES=  yes
 PKG_DEVELOPER=              yes
 X11_TYPE=                   modular
 FETCH_USING=                curl
-MAKE_JOBS=                  4
+MAKE_JOBS=                  $make_jobs
 WRKOBJDIR=                  /tmp/pkgbuild
 EOM
 
 cat << EOM > /mk-pkg.conf
 #!/bin/sh -e
 
+# Written by $0
+
 SKIP_LICENSE_CHECK=         yes
 ALLOW_VULNERABLE_PACKAGES=  yes
 PKG_DEVELOPER=              yes
 X11_TYPE=                   modular
 FETCH_USING=                curl
-MAKE_JOBS=                  4
+MAKE_JOBS=                  $make_jobs
 WRKOBJDIR=                  /tmp/pkgbuild
 EOM
 
-mkdir /pbulk
+mkdir -p /pbulk
 cat << EOM > /pbulk/bootstrap
 #!/bin/sh -e
+
+# Written by $0
 
 # Redirect workdir or it will use the pkgsrc tree outside the chroot
 
@@ -219,7 +229,7 @@ if [ ! -e /pbulk/bin/bmake ]; then
     cd /sharedapps/pkgsrc-2017Q1/bootstrap
     ./bootstrap \\
 	--abi=64 \\
-	--make-jobs=4 \\
+	--make-jobs=$make_jobs \\
 	--prefix=/pbulk \\
 	--varbase=/pbulk/var \\
 	--prefer-pkgsrc=yes \\
@@ -239,7 +249,7 @@ if [ ! -e /sharedapps/pkg-2017Q1/bin/bmake ]; then
     cd /sharedapps/pkgsrc-2017Q1/bootstrap
     ./bootstrap \\
 	--abi=64 \\
-	--make-jobs=4 \\
+	--make-jobs=$make_jobs \\
 	--prefix=$prefix \\
 	--varbase=$prefix/var \\
 	--prefer-pkgsrc=yes \\
@@ -264,11 +274,16 @@ EOM2
 
 cat << EOM2 >> /pbulk/etc/pbulk.conf
 
-##################################
-# Overrides from auto-pbulk-setup
+################################################################
+# Overrides from $0
 
-PATH=/pbulk/bin:$PATH
-export PATH
+# PATH=/pbulk/bin:$PATH
+# export PATH
+
+# https://pkgsrc.joyent.com/docs/bulk/
+# Limit processes to an hour of CPU time.  Anything which takes longer than
+# this is most probably broken.
+ulimit -t 3600
 
 bootstrapkit=/pbulk/bootstrap.tar.gz
 limited_list=/pbulk/etc/pbulk.list
@@ -283,8 +298,6 @@ packages=$pkgsrc/packages
 prefix=$prefix
 pkgdb=$prefix/pkgdb
 varbase=$prefix/var
-
-# Mounted from outside the chroot
 pkgsrc=$pkgsrc
 
 # Change to real IP and add IPs of other bulk build machines if desired
