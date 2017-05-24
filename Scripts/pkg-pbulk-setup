@@ -159,6 +159,7 @@ if [ 0$rsync_user != 0 ]; then
 fi
 
 pbulk_user=`auto_ask pbulk-user 'User to run pbulk builds?' pbulk`
+pbulk_group=`auto_ask pbulk-group 'Group to run pbulk builds?' pbulk`
 
 # Set up env for this tree
 PATH=/usr/bin:/usr/sbin:/bin:/sbin
@@ -260,7 +261,7 @@ fi
 
 cd /
 mkdir -p bulklog
-chown -Rh ${pbulk_user}:$pbulk_user $prefix $pkgsrc/packages /tmp/pkgbuild
+chown -Rh ${pbulk_user}:$pbulk_group $prefix $pkgsrc/packages /tmp/pkgbuild
 tar zcvf /pbulk/bootstrap.tar.gz .$prefix
 
 # Generate a pbulk.list file.  Users can add whatever packages they want
