@@ -168,6 +168,10 @@ export PATH
 # Make sure $pbulk_user user can access everything
 umask 022
 
+# When unpacking a tarball for a minimal chroot, tar may not honor some
+# permissions for security reasons.
+chmod 1777 /tmp /var/tmp
+
 # Copy root ssh in case keys are installed on rsync target
 mkdir -p /root
 
