@@ -9,12 +9,12 @@
 #       
 #   History:
 #   Date        Name        Modification
-#   2014-11-21  root        Begin
+#   2017-03-03  Jason Bacon Begin
 ##########################################################################
 
 usage()
 {
-    printf "Usage: $0 prefix pkgname\n"
+    printf "Usage: $0 [-p pkgsrc-dir] 'pattern'\n"
     exit 1
 }
 
@@ -23,10 +23,25 @@ usage()
 #   Main
 ##########################################################################
 
-if [ $# != 2 ]; then
-    usage
-fi
+case $# in
+1)
+    pkg_add=`which pkg_add`
+    pkgsrc=`echo ${pkg_add%/sbin/pkg_add} | sed -e 's|pkg|pkgsrc|g'`
+    pattern="$1"
+    ;;
 
-prefix=$1
-pkg=$2
-gunzip -c $prefix/var/db/pkg/pkg-vulnerabilities | fgrep $pkg
+3)
+    if [ $1 = '-p' ]; then
+	pkgsrc=$2
+	pattern="$3"
+    else
+	usage
+    fi
+    ;;
+
+*)
+    usage
+    ;;
+esac
+
+ls -d "$pkgsrc"/*/*$pattern*

@@ -14,14 +14,20 @@ pause()
     read junk
 }
 
+if which bmake; then
+    make=bmake
+else
+    make=make
+fi
+
 printf "Remove distfile? y/[n] "
 read distclean
 if [ 0$distclean = 0y ]; then
-    bmake distclean
+    $make distclean
 else
-    bmake clean
+    $make clean
 fi
 pkglint -e || true
 pause
-bmake deinstall
-bmake install
+$make deinstall
+$make install

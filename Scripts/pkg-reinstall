@@ -5,14 +5,22 @@ if [ $# -gt 1 ]; then
     exit 1
 fi
 
-if [ `uname` = 'NetBSD' ]; then
-    make='make'
+if which bmake; then
+    make=bmake
 else
-    make='bmake'
+    make=make
 fi
 
 if [ $# = 1 ]; then
-    cd $1
+    pkg_add=`which pkg_add`
+    pkgsrc=`echo ${pkg_add%/sbin/pkg_add} | sed -e 's|pkg|pkgsrc|g'`
+    dir=`echo $pkgsrc/*/$1`
+    count=`echo $dir | wc -w`
+    if [ $count = 2 ]; then
+	printf "Ambiguous: $dir\n"
+	exit 1
+    fi
+    cd $dir
 fi
 
 printf "Remove distfile? y/[n] "

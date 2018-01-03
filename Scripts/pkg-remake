@@ -44,19 +44,19 @@ elif [ -d ../.svn ]; then
 fi
 
 if which bmake; then
-    make='bmake'
+    make=bmake
 else
-    make='make'
+    make=make
 fi
 
 if [ 0$remove_distfile = 0y ]; then
-    ${make} distclean
+    $make distclean
 else
-    ${make} clean
+    $make clean
 fi
 
 rm -f distinfo
-${make} distinfo
+$make distinfo
 
 printf "Regenerate $plist? (y/[n]) "
 read regen_plist
@@ -67,28 +67,25 @@ if [ 0$regen_plist = 0'y' ]; then
 	mv -f $plist $plist.old
     fi
     printf '@comment $NetBSD$\n' > PLIST
-    if ${make} deinstall 2>&1 | fgrep -q 'still required'; then
-	${make} deinstall
+    if $make deinstall 2>&1 | fgrep -q 'still required'; then
+	$make deinstall
 	exit 1
     fi
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
-    ${make} stage-install || true
-    ${make} print-PLIST > $plist
+    $make stage-install || true
+    $make print-PLIST > $plist
     pause
     $EDITOR $plist
     if diff -u $plist.old $plist; then
 	printf "No changes to $plist\n"
     fi
     pause
-    ${make} clean
-    ${make} deinstall
-    printf "Remove $plist.old? y/[n] "
-    read remove
-    if [ 0$remove = 0y ]; then
-	rm -f $plist.old
-    fi
-elif ${make} deinstall 2>&1 | fgrep -q 'still required'; then
-    ${make} deinstall
+    $make clean
+    $make deinstall
+    rm -f $plist.old
+elif $make deinstall 2>&1 | fgrep -q 'still required'; then
+    # Show errors redirected above
+    $make deinstall
     exit 1
 fi
 
@@ -99,6 +96,11 @@ Running pkg-check...
 ===========================================================================
 
 EOM
+
+# Reinstall pkg-check in case we're remaking pkg-dev
+if [ $(basename $(pwd)) = pkg-dev ]; then
+    $make reinstall
+fi
 pkg-check
 
 printf "Commit changes to package? y/[n] "
@@ -107,6 +109,12 @@ if [ 0$commit = 0y ]; then
     if [ -d CVS ]; then
 	cvs ci
     elif [ -d ../.svn ]; then
-	svn ci -m "pkg-remake"
+	svn ci
     fi
+fi
+
+printf "Deinstall? y/[n] "
+read deinstall
+if [ 0$deinstall = 0y ]; then
+    $make deinstall
 fi
