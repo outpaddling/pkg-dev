@@ -1,0 +1,67 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2014-11-10  Charlie &   Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 filename\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+filename="$1"
+if [ ! -e DESCR ]; then
+    printf "$0 must be run from a package directory.\n"
+    exit 1
+fi
+
+if [ ! -e "$filename.orig" ]; then
+    printf "Error: No $filename.orig present.\n"
+    exit 1
+fi
+
+port_dir=`pwd`
+grandparent=${port_dir%/*/*}
+package=${port_dir#$grandparent/}
+echo $grandparent $package
+WRKSRC=`auto-print-make-variable -p $grandparent $package WRKSRC`
+# Get relative path
+WRKSRC=${WRKSRC#$port_dir/}
+
+mkdir -p patches
+
+# Go to WRKSRC and generate patch file
+set -x
+echo $WRKSRC
+cd $WRKSRC
+file1=${filename#./$WRKSRC/}
+file=${file1#$WRKSRC/}
+patch_file='patch-'`echo "$file" | sed -e 's|_|__|g' | sed -e 's|/|_|g'`
+pkgdiff "$file.orig" "$file" > $port_dir/patches/$patch_file || true
+#${EDITOR:=vi}
+cd $port_dir
+vi patches/$patch_file
+if which bmake; then
+    make=bmake
+else
+    make=make
+fi
+$make makepatchsum

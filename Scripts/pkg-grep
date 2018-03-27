@@ -28,13 +28,7 @@ usage()
 #   Main
 ##########################################################################
 
-if which pkg_add; then
-    pkg_add=`which pkg_add`
-    pkgsrc=`echo ${pkg_add%/sbin/pkg_add} | sed -e 's|pkg|pkgsrc|g'`
-else
-    printf "Cannot determine pkgsrc pkgsrc-dir.\n"
-    exit 1
-fi
+pkgsrc=`pkgsrc-dir`
 
 # Overwrite later if provided as an argument
 filename='Makefile'

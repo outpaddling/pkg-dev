@@ -40,4 +40,3 @@ esac
 
 pkg=`basename $(pwd)`
 diff -ruN --exclude CVS --exclude .svn ../../$category/$pkg .
-

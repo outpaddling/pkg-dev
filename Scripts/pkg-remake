@@ -43,11 +43,7 @@ elif [ -d ../.svn ]; then
     svn up
 fi
 
-if which bmake; then
-    make=bmake
-else
-    make=make
-fi
+make=`pkgsrc-make`
 
 if [ 0$remove_distfile = 0y ]; then
     $make distclean
@@ -110,6 +106,10 @@ if [ 0$commit = 0y ]; then
 	cvs ci
     elif [ -d ../.svn ]; then
 	svn ci
+    elif [ -d ../.git ]; then
+	git commit .
+	git pull -r
+	git push
     fi
 fi
 

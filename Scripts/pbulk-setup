@@ -272,6 +272,7 @@ MAKE_JOBS=                  $make_jobs
 PKGSRC_FORTRAN=             gfortran
 WRKOBJDIR=                  /tmp/pkgbuild
 PKGSRC_USE_FORTIFY=         no
+PKG_OPTIONS.libfetch=       inet6 openssl
 EOM
 
 if [ `uname` != NetBSD ]; then

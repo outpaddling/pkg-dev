@@ -25,8 +25,7 @@ usage()
 
 case $# in
 1)
-    pkg_add=`which pkg_add`
-    pkgsrc=`echo ${pkg_add%/sbin/pkg_add} | sed -e 's|pkg|pkgsrc|g'`
+    pkgsrc=`pkgsrc-dir`
     pattern="$1"
     ;;
 

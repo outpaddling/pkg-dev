@@ -5,18 +5,12 @@ if [ $# -gt 1 ]; then
     exit 1
 fi
 
-if which bmake; then
-    make=bmake
-else
-    make=make
-fi
-
+make=`pkgsrc-make`
 if [ $# = 1 ]; then
-    pkg_add=`which pkg_add`
-    pkgsrc=`echo ${pkg_add%/sbin/pkg_add} | sed -e 's|pkg|pkgsrc|g'`
+    pkgsrc=`pkgsrc-dir`
     dir=`echo $pkgsrc/*/$1`
     count=`echo $dir | wc -w`
-    if [ $count = 2 ]; then
+    if [ $count -gt 1 ]; then
 	printf "Ambiguous: $dir\n"
 	exit 1
     fi
@@ -34,4 +28,3 @@ fi
 $make
 $make deinstall
 $make install
-
