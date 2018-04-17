@@ -108,6 +108,22 @@ if ! which cvs; then
     exit 1
 fi
 
+if [ `uname` != NetBSD ] && [ `uname` != SunOS ] && \
+    [ `uname` != FreeBSD ] && [ `uname` != DragonFly ] && ! which java; then
+    cat << EOM
+
+Warning: No Java installation detected and the openjdk packages only build
+on certain BSD and SunOS systems.  On Linux, Mac OS X, and other platforms,
+you should install a Java JDK before bootstrapping pkgsrc.
+
+EOM
+    printf "Continue without Java? y/[n] "
+    read continue
+    if [ 0$continue != 0y ]; then
+	exit
+    fi
+fi
+
 cat << EOM
 
 $0 should only be run in a chroot, VM, or on a system that is
