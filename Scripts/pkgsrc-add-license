@@ -1,0 +1,32 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2016-01-05  root        Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 license\n\nEx. $0 acm-license\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+prefix=`pkgsrc-prefix`
+license=$1
+auto-append-line $license "ACCEPTABLE_LICENSES+=\t$license" $prefix/etc/mk.conf $0
