@@ -30,7 +30,7 @@ fi
 if [ -e /var/db/pkg/pkg-vulnerabilities ]; then
     prefix=/
 else
-    prefix=`pkgsrc-prefix`
+    prefix=`auto-pkgsrc-prefix`
 fi
 pkg=$1
 gunzip -c $prefix/var/db/pkg/pkg-vulnerabilities | fgrep $pkg

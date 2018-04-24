@@ -27,6 +27,6 @@ if [ $# != 1 ]; then
     usage
 fi
 
-prefix=`pkgsrc-prefix`
+prefix=`auto-pkgsrc-prefix`
 license=$1
 auto-append-line $license "ACCEPTABLE_LICENSES+=\t$license" $prefix/etc/mk.conf $0
