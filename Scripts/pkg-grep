@@ -28,7 +28,7 @@ usage()
 #   Main
 ##########################################################################
 
-pkgsrc=`pkgsrc-dir`
+pkgsrc=`auto-pkgsrc-dir`
 
 # Overwrite later if provided as an argument
 filename='Makefile'

@@ -7,7 +7,7 @@ fi
 
 make=`pkgsrc-make`
 if [ $# = 1 ]; then
-    pkgsrc=`pkgsrc-dir`
+    pkgsrc=`auto-pkgsrc-dir`
     dir=`echo $pkgsrc/*/$1`
     count=`echo $dir | wc -w`
     if [ $count -gt 1 ]; then

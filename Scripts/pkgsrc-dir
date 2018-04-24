@@ -1,4 +1,0 @@
-#!/bin/sh -e
-
-prefix=`pkgsrc-prefix`
-printf ${prefix} | sed 's|pkg|pkgsrc|'
