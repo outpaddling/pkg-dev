@@ -462,7 +462,8 @@ EOM2
 
 # Update pbulk.conf with some reasonable defaults for this build.
 
-cat << EOM2 >> $pbulk_dir/etc/pbulk.conf
+if ! fgrep -q "Overrides from $0" $pbulk_dir/etc/pbulk.conf; then
+    cat << EOM2 >> $pbulk_dir/etc/pbulk.conf
 
 ################################################################
 # Overrides from $0
@@ -477,7 +478,7 @@ export PATH
 ulimit -t 3600
 
 bootstrapkit=$pbulk_dir/bootstrap.tar.gz
-limited_list=$pbulk_dir/etc/pbulk.list
+# limited_list=$pbulk_dir/etc/pbulk.list
 reuse_scan_results=yes
 unprivileged_user=$pbulk_user
 make=$prefix/bin/bmake
@@ -500,6 +501,10 @@ report_recipients="pkgsrc-bulk@netbsd.org"
 mail=:
 
 EOM2
+else
+    printf "Overrides already exist in $pbulk_dir/etc/pbulk.conf.\n"
+    printf "Leaving $pbulk_dir/etc/pbulk.conf alone.\n"
+fi
 
 EOM
 
