@@ -17,6 +17,13 @@ if [ -z $EDITOR ]; then
     EDITOR=vi
 fi
 
+if [ $# = 1 ]; then
+    cd `pkgsrc-dir`/$1
+fi
+
+pkg_dir=`pwd | awk -F / '{ printf("%s/%s", $(NF-1), $NF); }'`
+pkgbase=`auto-print-make-variable $pkg_dir PKGBASE`
+
 if [ `uname` = 'Darwin' ]; then
     cat << EOM
 Warning: Running $0 on Darwin may generate .dylib files instead of .so files.
@@ -57,16 +64,15 @@ $make distinfo
 printf "Regenerate $plist? (y/[n]) "
 read regen_plist
 
+# Remove despite dependencies
+pkg_delete -f $pkgbase
+
 # deinstall as late as possible to minimize uninstalled time
 if [ 0$regen_plist = 0'y' ]; then
     if [ -e $plist ] && [ ! -e $plist.old ]; then
 	mv -f $plist $plist.old
     fi
     printf '@comment $NetBSD$\n' > PLIST
-    if $make deinstall 2>&1 | fgrep -q 'still required'; then
-	$make deinstall
-	exit 1
-    fi
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
     $make stage-install || true
     $make print-PLIST > $plist
@@ -77,12 +83,7 @@ if [ 0$regen_plist = 0'y' ]; then
     fi
     pause
     $make clean
-    $make deinstall
     rm -f $plist.old
-elif $make deinstall 2>&1 | fgrep -q 'still required'; then
-    # Show errors redirected above
-    $make deinstall
-    exit 1
 fi
 
 cat << EOM
@@ -93,8 +94,10 @@ Running pkg-check...
 
 EOM
 
-# Reinstall pkg-check in case we're remaking pkg-dev
-if [ $(basename $(pwd)) = pkg-dev ]; then
+# Reinstall if we're remaking pkg-dev or it's dep, auto-admin.
+# We need to run scripts from both packages here.
+basename=`basename $(pwd)`
+if [ $basename = pkg-dev ] || [ $basename = auto-admin ]; then
     $make reinstall
 fi
 pkg-check
