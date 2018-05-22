@@ -8,7 +8,7 @@ fi
 make=`pkgsrc-make`
 
 if [ $# = 1 ]; then
-    cd `pkgsrc-dir`/$1
+    cd `auto-pkgsrc-dir`/$1
 fi
 
 printf "Remove distfile? y/[n] "

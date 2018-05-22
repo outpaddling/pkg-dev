@@ -42,7 +42,7 @@ if [ -z $EDITOR ]; then
 fi
 
 if [ $# = 1 ]; then
-    cd `pkgsrc-dir`/$1
+    cd `auto-pkgsrc-dir`/$1
 fi
 
 pkg_dir=`pwd | awk -F / '{ printf("%s/%s", $(NF-1), $NF); }'`
