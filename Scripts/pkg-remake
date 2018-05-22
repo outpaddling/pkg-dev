@@ -1,9 +1,24 @@
 #!/bin/sh -e
 
 ##########################################################################
-#   Function description:
-#       Pause until user presses return
+#   Script description:
+#       Rebuild a package, possibly downloading a new dist and
+#       regenerating plist.
+#
+#   Arguments:
+#       1.  category/package (optional)
+#
+#   History:
+#   Date        Name        Modification
+#   2016        Jason Bacon Begin
 ##########################################################################
+
+usage()
+{
+    printf "Usage: $0 \n"
+    exit 1
+}
+
 
 pause()
 {
@@ -12,6 +27,15 @@ pause()
     printf "Press return to continue..."
     read junk
 }
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# -gt 1 ]; then
+    usage
+fi
 
 if [ -z $EDITOR ]; then
     EDITOR=vi
