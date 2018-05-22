@@ -357,6 +357,7 @@ EOM
     empty(PKGPATH:Mconverters/help2man) && \\
     empty(PKGPATH:Mconverters/p5-Unicode-EastAsianWidth) && \\
     empty(PKGPATH:Mdevel/autoconf) && \\
+    empty(PKGPATH:Mdevel/binutils) && \\
     empty(PKGPATH:Mdevel/gettext-lib) && \\
     empty(PKGPATH:Mdevel/gettext-tools) && \\
     empty(PKGPATH:Mdevel/gmp) && \\
