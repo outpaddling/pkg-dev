@@ -384,6 +384,16 @@ EOM
 GCC_REQD+=$gcc_version
 
 .endif  # GCC_REQD
+
+# RHEL systems may have an outdated "as" that cannot translate instructions
+# from current GCC code generators, so force pkgsrc binutils.
+.if exists(/etc/redhat-release) && !empty(PKGPATH:Mlang/gcc*)
+CONFIGURE_ARGS+=        --with-gnu-as --with-as=\${PREFIX}/bin/gas
+CONFIGURE_ARGS+=        --with-gnu-ld --with-ld=\${PREFIX}/bin/gld
+BUILDLINK_DEPMETHOD.binutils=   full
+.  include "../../devel/binutils/buildlink3.mk"
+.endif
+
 EOM
 fi
 
