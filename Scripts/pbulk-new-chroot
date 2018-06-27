@@ -61,7 +61,7 @@ rm -rf $dir/dev/* $dir/proc/*
 # Update OS inside chroot
 if [ `uname` = Linux ] && [ -e $dir/etc/redhat-release ]; then
     pbulk-start-chroot $dir 'yum update -y'
-    pbulk-start-chroot $dir 'yum install -y cvs gcc gcc-c++ gcc-gfortran'
+    pbulk-start-chroot $dir 'yum install -y cvs gcc gcc-c++ gcc-gfortran java-1.8.0-openjdk-headless'
 elif [ `uname` = NetBSD ]; then
     # Clear /kern for null mount
     # Dangerous: Can wipe host dirs while null-mounted
