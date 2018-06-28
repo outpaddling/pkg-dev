@@ -30,7 +30,7 @@ else
     if [ $# = 0 ]; then
 	pkg=`basename $(pwd)`
     elif [ $# = 1 ]; then
-	if [ $1 == --help ]; then
+	if [ $1 = --help ]; then
 	    usage
 	else
 	    pkg=$1
