@@ -20,5 +20,7 @@ else
 fi
 # Rebuild before deinstalling to minimize uninstalled time
 $make
-$make deinstall
+pkg_dir=`pwd | awk -F / '{ printf("%s/%s", $(NF-1), $NF); }'`
+pkgbase=`auto-print-make-variable $pkg_dir PKGBASE`
+pkg_delete -f $pkgbase
 $make install
