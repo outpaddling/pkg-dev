@@ -240,9 +240,14 @@ export PATH
 unset LD_LIBRARY_PATH
 
 case `uname` in
-FreeBSD|NetBSD)
+FreeBSD)
     fetch_cmd=fetch
     ;;
+
+NetBSD)
+    fetch_cmd=ftp
+    ;;
+
 *)
     fetch_cmd=curl
     ;;
