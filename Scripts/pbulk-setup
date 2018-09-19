@@ -196,7 +196,7 @@ read update
 if [ 0$update != 0n ]; then
     save_cwd=`pwd`
     cd $pkgsrc
-    cvs -q up -dP
+    cvs -q up -dP || true
     cd $save_cwd
 fi
 
@@ -216,7 +216,19 @@ make_jobs=`auto_ask make-jobs 'Max # processes for make to use?' 4`
 
 rsync_user=`auto_ask rsync-user 'rsync username (leave blank if you do not want to upload packages)?' ''`
 if [ 0$rsync_user != 0 ]; then
-    os=`auto-os-release`
+    # Don't rely on auto-admin.  This script is often run in a minimal
+    # chroot environment.  Duplicating auto-os-release here instead.
+    if [ -e /etc/redhat-release ]; then
+        release=`cat /etc/redhat-release`
+        release=${release%%.*}
+        release=${release##*release }
+        os=RHEL$release
+    elif [ `uname` = Darwin ]; then
+        os=$(uname)$(uname -r | cut -d . -f 1)
+    else
+        os=$(uname)-$(uname -r)
+    fi
+
     rsync_host=`auto_ask rsync-host 'rsync hostname?' ''`
     rsync_pkg_dir=`auto_ask rsync-pkg-dir 'rsync pkg directory?' "www/pkgsrc/packages$prefix/$os"`
     rsync_report_dir=`auto_ask rsync-report-dir 'rsync report directory?' "www/pkgsrc/reports$prefix/$os"`
@@ -283,7 +295,7 @@ FETCH_USING=                $fetch_cmd
 MAKE_JOBS=                  $make_jobs
 PKGSRC_FORTRAN=             gfortran
 WRKOBJDIR=                  /tmp/pkgbuild
-PKGSRC_USE_FORTIFY=         no
+# PKGSRC_USE_FORTIFY=         no
 PKG_OPTIONS.libfetch=       inet6 openssl
 EOM
 
