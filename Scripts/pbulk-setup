@@ -326,12 +326,13 @@ except itself.
 3.. 5.0
 4.. 6.0
 5.. 7.0
+6.. 8.0
 
 EOM
-    printf "Selection? [3] "
+    printf "Selection? [4] "
     read selection
     if [ 0$selection = 0 ]; then
-	selection=3
+	selection=4
     fi
     case $selection in
     1)
@@ -353,6 +354,10 @@ EOM
     5)
 	base_gcc=gcc7
 	gcc_version=7.0
+	;;
+    6)
+	base_gcc=gcc8
+	gcc_version=8.0
 	;;
     esac
 
