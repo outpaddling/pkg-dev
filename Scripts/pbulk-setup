@@ -219,14 +219,14 @@ if [ 0$rsync_user != 0 ]; then
     # Don't rely on auto-admin.  This script is often run in a minimal
     # chroot environment.  Duplicating auto-os-release here instead.
     if [ -e /etc/redhat-release ]; then
-        release=`cat /etc/redhat-release`
-        release=${release%%.*}
-        release=${release##*release }
-        os=RHEL$release
+	release=`cat /etc/redhat-release`
+	release=${release%%.*}
+	release=${release##*release }
+	os=RHEL$release
     elif [ `uname` = Darwin ]; then
-        os=$(uname)$(uname -r | cut -d . -f 1)
+	os=$(uname)$(uname -r | cut -d . -f 1)
     else
-        os=$(uname)-$(uname -r)
+	os=$(uname)-$(uname -r)
     fi
 
     rsync_host=`auto_ask rsync-host 'rsync hostname?' ''`
@@ -361,6 +361,8 @@ EOM
 	;;
     esac
 
+    # Keep this in sync with auto-pkgsrc-setup for installations that use both
+    # binary packages and build from source.
     cat << EOM >> /mk-pkg.conf
 
 .if \
@@ -368,13 +370,16 @@ EOM
     empty(PKGPATH:Marchivers/pax) && \\
     empty(PKGPATH:Marchivers/xz) && \\
     empty(PKGPATH:Mconverters/help2man) && \\
+    empty(PKGPATH:Mconverters/libiconv) && \\
     empty(PKGPATH:Mconverters/p5-Unicode-EastAsianWidth) && \\
     empty(PKGPATH:Mdevel/autoconf) && \\
     empty(PKGPATH:Mdevel/binutils) && \\
     empty(PKGPATH:Mdevel/gettext-lib) && \\
     empty(PKGPATH:Mdevel/gettext-tools) && \\
+    empty(PKGPATH:Mdevel/gmake) && \\
     empty(PKGPATH:Mdevel/gmp) && \\
     empty(PKGPATH:Mdevel/gtexinfo) && \\
+    empty(PKGPATH:Mdevel/pkgconf) && \\
     empty(PKGPATH:Mdevel/libtool-base) && \\
     empty(PKGPATH:Mdevel/m4) && \\
     empty(PKGPATH:Mdevel/ncurses) && \\
@@ -388,10 +393,13 @@ EOM
     empty(PKGPATH:Mmath/mpcomplex) && \\
     empty(PKGPATH:Mmath/mpfr) && \\
     empty(PKGPATH:Mmisc/p5-Locale-libintl) && \\
+    empty(PKGPATH:Mnet/libfetch) && \\
     empty(PKGPATH:Mpkgtools/cwrappers) && \\
     empty(PKGPATH:Mpkgtools/digest) && \\
     empty(PKGPATH:Mpkgtools/pkg_install-info) && \\
+    empty(PKGPATH:Mpkgtools/pkgin) && \\
     empty(PKGPATH:Msysutils/checkperms) && \\
+    empty(PKGPATH:Mtextproc/gsed) && \\
     empty(PKGPATH:Mtextproc/p5-Text-Unidecode)
 
 GCC_REQD+=$gcc_version
