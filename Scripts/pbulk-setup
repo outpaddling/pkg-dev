@@ -197,6 +197,8 @@ if [ 0$update != 0n ]; then
     save_cwd=`pwd`
     cd $pkgsrc
     cvs -q up -dP || true
+    # Make sure pbulk user can read everything
+    chmod -R a+rX $pkgsrc
     cd $save_cwd
 fi
 

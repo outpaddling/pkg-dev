@@ -41,3 +41,4 @@ pkglint -e || true
 pause
 $make deinstall
 $make install
+$make clean
