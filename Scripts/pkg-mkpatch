@@ -2,14 +2,14 @@
 
 ##########################################################################
 #   Script description:
-#       
+#       Generate a patch for a pkgsrc source file
+#
 #   Arguments:
-#       
-#   Returns:
+#       Path to file from pkgsrc dir
 #       
 #   History:
 #   Date        Name        Modification
-#   2014-11-10  Charlie &   Begin
+#   2014-11-10  J Bacon     Begin
 ##########################################################################
 
 usage()
@@ -38,26 +38,24 @@ if [ ! -e "$filename.orig" ]; then
     exit 1
 fi
 
-port_dir=`pwd`
-grandparent=${port_dir%/*/*}
-package=${port_dir#$grandparent/}
-echo $grandparent $package
+pkg_dir=`pwd`
+grandparent=${pkg_dir%/*/*}
+package=${pkg_dir#$grandparent/}
 WRKSRC=`auto-print-make-variable -p $grandparent $package WRKSRC`
 # Get relative path
-WRKSRC=${WRKSRC#$port_dir/}
+WRKSRC=${WRKSRC#$pkg_dir/}
 
 mkdir -p patches
 
 # Go to WRKSRC and generate patch file
 set -x
-echo $WRKSRC
 cd $WRKSRC
 file1=${filename#./$WRKSRC/}
 file=${file1#$WRKSRC/}
 patch_file='patch-'`echo "$file" | sed -e 's|_|__|g' | sed -e 's|/|_|g'`
-pkgdiff "$file.orig" "$file" > $port_dir/patches/$patch_file || true
+pkgdiff "$file.orig" "$file" > $pkg_dir/patches/$patch_file || true
 #${EDITOR:=vi}
-cd $port_dir
+cd $pkg_dir
 vi patches/$patch_file
 if which bmake; then
     make=bmake
