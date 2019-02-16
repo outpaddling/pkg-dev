@@ -93,21 +93,25 @@ pkg_delete -f $pkgbase
 
 # deinstall as late as possible to minimize uninstalled time
 if [ 0$regen_plist = 0'y' ]; then
-    if [ -e $plist ] && [ ! -e $plist.old ]; then
-	mv -f $plist $plist.old
-    fi
-    printf '@comment $NetBSD$\n' > PLIST
+    printf '@comment $NetBSD$\n' > $plist.new
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
     $make stage-install || true
-    $make print-PLIST > $plist
+    $make print-PLIST > $plist.new
     pause
-    $EDITOR $plist
-    if diff -u $plist.old $plist; then
-	printf "No changes to $plist\n"
+    $EDITOR $plist.new
+    if ! diff -u $plist $plist.new; then
+	printf "Install new plist and test package? y/[n] "
+	read new_plist
+	if [ 0$new_plist = 0y ]; then
+	    mv -f $plist.new $plist
+	else
+	    exit 0
+	fi
+	$make clean
+    else
+	printf "No changes to $plist.\n"
+	rm -f $plist.new
     fi
-    pause
-    $make clean
-    rm -f $plist.old
 fi
 
 cat << EOM
