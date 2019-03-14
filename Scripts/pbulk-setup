@@ -367,7 +367,8 @@ EOM
     # binary packages and build from source.
     cat << EOM >> /mk-pkg.conf
 
-.if \
+.if \\
+    empty(PKGPATH:Marchivers/bsdtar) && \\
     empty(PKGPATH:Marchivers/bzip2) && \\
     empty(PKGPATH:Marchivers/pax) && \\
     empty(PKGPATH:Marchivers/xz) && \\
