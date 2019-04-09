@@ -331,7 +331,7 @@ except itself.
 6.. 8.0
 
 EOM
-    printf "Selection? [4] "
+    printf "Selection? [5] "
     read selection
     if [ 0$selection = 0 ]; then
 	selection=4
@@ -584,10 +584,5 @@ cat << EOM
 Now run
 
 $pbulk_dir/bootstrap
-
-Then edit $pbulk_dir/etc/pbulk.conf and $pbulk_dir/etc/pbulk.list to taste 
-and finally run
-
-$pbulk_dir/bin/bulkbuild
 
 EOM
