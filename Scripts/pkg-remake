@@ -98,7 +98,15 @@ if [ 0$regen_plist = 0'y' ]; then
     $make stage-install || true
     $make print-PLIST > $plist.new
     pause
+    
+    # Remove items already in PLIST.common
+    if [ -e PLIST.common ]; then
+	printf '@comment $NetBSD$\n' > $plist.tmp
+	fgrep -f PLIST.common -v $plist >> $plist.tmp
+	mv -f $plist.tmp $plist.new
+    fi
     $EDITOR $plist.new
+    
     if ! diff -u $plist $plist.new; then
 	printf "Install new plist and test package? y/[n] "
 	read new_plist
