@@ -102,7 +102,7 @@ if [ 0$regen_plist = 0'y' ]; then
     # Remove items already in PLIST.common
     if [ -e PLIST.common ]; then
 	printf '@comment $NetBSD$\n' > $plist.tmp
-	fgrep -f PLIST.common -v $plist >> $plist.tmp
+	fgrep -f PLIST.common -v $plist.new >> $plist.tmp
 	mv -f $plist.tmp $plist.new
     fi
     $EDITOR $plist.new
