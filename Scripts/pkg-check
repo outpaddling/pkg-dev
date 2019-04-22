@@ -41,4 +41,8 @@ pkglint -e || true
 pause
 $make deinstall
 $make install
-$make clean
+printf "Clean? y/[n] "
+read clean
+if [ 0$clean != 0y ]; then
+    $make clean
+fi
