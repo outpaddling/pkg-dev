@@ -2,14 +2,11 @@
 
 ##########################################################################
 #   Script description:
-#       
-#   Arguments:
-#       
-#   Returns:
+#       Add a license to ACCEPTABLE_LICENSES in mk.conf
 #       
 #   History:
 #   Date        Name        Modification
-#   2016-01-05  root        Begin
+#   2016-01-05  J Bacon     Begin
 ##########################################################################
 
 usage()

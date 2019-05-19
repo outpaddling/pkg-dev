@@ -20,6 +20,19 @@ usage()
 
 
 ##########################################################################
+#   Function description:
+#       Pause until user presses return
+##########################################################################
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+##########################################################################
 #   Main
 ##########################################################################
 
@@ -48,11 +61,17 @@ WRKSRC=${WRKSRC#$pkg_dir/}
 mkdir -p patches
 
 # Go to WRKSRC and generate patch file
-set -x
 cd $WRKSRC
 file1=${filename#./$WRKSRC/}
 file=${file1#$WRKSRC/}
 patch_file='patch-'`echo "$file" | sed -e 's|_|__|g' | sed -e 's|/|_|g'`
+if [ -e $pkg_dir/patches/$patch_file ]; then
+    printf "==================\n"
+    printf "Copy any comments from the original patch file:\n"
+    head -5 $pkg_dir/patches/$patch_file
+    printf "==================\n"
+    pause
+fi
 pkgdiff "$file.orig" "$file" > $pkg_dir/patches/$patch_file || true
 #${EDITOR:=vi}
 cd $pkg_dir

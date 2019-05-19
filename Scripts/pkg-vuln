@@ -2,14 +2,11 @@
 
 ##########################################################################
 #   Script description:
-#       
-#   Arguments:
-#       
-#   Returns:
+#       Show current package vulnerabilities
 #       
 #   History:
 #   Date        Name        Modification
-#   2014-11-21  root        Begin
+#   2014-11-21  J Bacon     Begin
 ##########################################################################
 
 usage()
