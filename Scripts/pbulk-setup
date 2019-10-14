@@ -331,10 +331,11 @@ except itself.
 6.. 8.0
 
 EOM
-    printf "Selection? [5] "
+    default_selection=5
+    printf "Selection? [$default_selection] "
     read selection
     if [ 0$selection = 0 ]; then
-	selection=5
+	selection=$default_selection
     fi
     case $selection in
     1)
