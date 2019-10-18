@@ -159,11 +159,11 @@ if [ ! -e $pkgsrc ]; then
     printf "Download and unpack pkgsrc? y/[n] "
     read download
     if [ 0$download = 0y ]; then
-	quarter=`auto_ask quarter 'Quarter? [e.g. 2017Q3 or current]' current`
-	if [ 0$quarter = 0current ]; then
-	    url=ftp://ftp.netbsd.org/pub/pkgsrc/$quarter/pkgsrc.tar.gz
+	snapshot=`auto_ask snapshot 'Snapshot? [e.g. 2017Q3 or current]' current`
+	if [ 0$snapshot = 0current ]; then
+	    url=ftp://ftp.netbsd.org/pub/pkgsrc/$snapshot/pkgsrc.tar.gz
 	else
-	    url=ftp://ftp.netbsd.org/pub/pkgsrc/pkgsrc-$quarter/pkgsrc.tar.gz
+	    url=ftp://ftp.netbsd.org/pub/pkgsrc/pkgsrc-$snapshot/pkgsrc.tar.gz
 	fi
 	if which curl; then
 	    curl -O $url
@@ -180,7 +180,7 @@ if [ ! -e $pkgsrc ]; then
 	mkdir -p $parent
 	cd $parent
 	tar zxvf $start_dir/pkgsrc.tar.gz
-	if [ 0$quarter != 0current ]; then
+	if [ 0$snapshot != 0current ]; then
 	    mv pkgsrc `basename $pkgsrc`
 	fi
 	cd $start_dir
@@ -426,13 +426,20 @@ GCC_REQD+=$gcc_version
 
 .endif  # GCC_REQD
 
+# Keep this in sync with auto-pkgsrc-setup
+.if exists(/etc/redhat-release) && !empty(PKGPATH:Mlang/gcc*)
+
 # RHEL systems may have an outdated "as" that cannot translate instructions
 # from current GCC code generators, so force pkgsrc binutils.
-.if exists(/etc/redhat-release) && !empty(PKGPATH:Mlang/gcc*)
 CONFIGURE_ARGS+=        --with-gnu-as --with-as=\${PREFIX}/bin/gas
 CONFIGURE_ARGS+=        --with-gnu-ld --with-ld=\${PREFIX}/bin/gld
 BUILDLINK_DEPMETHOD.binutils=   full
-.  include "../../devel/binutils/buildlink3.mk"
+.include "../../devel/binutils/buildlink3.mk"
+
+# pkgsrc gcc packages don't install libgcc_s on some platforms, to
+# avoid problems when mixing compiler versions.  This breaks our use
+# of pkgsrc gcc on EL.
+PKG_DEFAULT_OPTIONS+=   always-libgcc
 .endif
 
 EOM
