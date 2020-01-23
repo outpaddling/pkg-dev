@@ -43,6 +43,6 @@ $make deinstall
 $make install
 printf "Clean? y/[n] "
 read clean
-if [ 0$clean != 0y ]; then
+if [ 0$clean = 0y ]; then
     $make clean
 fi
