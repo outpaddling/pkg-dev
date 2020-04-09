@@ -297,9 +297,20 @@ FETCH_USING=                $fetch_cmd
 MAKE_JOBS=                  $make_jobs
 PKGSRC_FORTRAN=             gfortran
 WRKOBJDIR=                  /tmp/pkgbuild
-# PKGSRC_USE_FORTIFY=         no
 PKG_OPTIONS.libfetch=       inet6 openssl
 EOM
+
+# Problems with gcc8 generating code with infinite loops on CentOS
+if [ $(uname) = Linux ]; then
+    export PKGSRC_USE_FORTIFY=no
+    cat << EOM >> /mk-pbulk.conf
+PKGSRC_USE_FORTIFY=         no
+EOM
+    cat << EOM >> /mk-pkg.conf
+PKGSRC_USE_FORTIFY=         no
+EOM
+fi
+
 
 if [ `uname` != NetBSD ]; then
     cat << EOM >> /mk-pkg.conf
