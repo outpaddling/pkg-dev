@@ -1,0 +1,90 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       Unpack a tarball of a chroot image and configure it for pbulk
+#
+#   Arguments:
+#       tarball
+#       New directory to unpack in
+#
+#   History:
+#   Date        Name        Modification
+#   2017-12-24  root        Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 chroot-tarball chroot-dir\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 2 ]; then
+    usage
+fi
+
+tarball=$1
+dir=$2
+
+if [ -e $dir ]; then
+    printf "$dir already exists.  Aborting...\n"
+    exit 1
+fi
+
+# Unpack tarball into dir
+umask 022   # Everything must be accessible to pbulk user/group
+mkdir $dir
+cd $dir
+tar zxvf ../$tarball
+chmod 1777 tmp var/tmp
+cd ..
+
+# Clean /dev and /proc for null mount
+# Dangerous: Can wipe host dirs while null-mounted
+if mount | fgrep $dir; then
+    cat << EOM
+
+It appears that some directories in your chroot are currently null-mounted.
+Removing $dir/kern/* while /kern is null-mounted could
+damage your host system.  Aborting...
+
+EOM
+    exit 1
+fi
+rm -rf $dir/dev/* $dir/proc/*
+
+# Update OS inside chroot
+if [ `uname` = Linux ] && [ -e $dir/etc/redhat-release ]; then
+    pbulk-start-chroot $dir 'yum update -y'
+    pbulk-start-chroot $dir 'yum install -y cvs gcc gcc-c++ gcc-gfortran java-1.8.0-openjdk-headless'
+elif [ `uname` = NetBSD ]; then
+    # Clear /kern for null mount
+    # Dangerous: Can wipe host dirs while null-mounted
+    if mount | fgrep $dir; then
+	cat << EOM
+
+It appears that some directories in your chroot are currently null-mounted.
+Removing $dir/kern/* while /kern is null-mounted could
+damage your host system.  Aborting...
+
+EOM
+	exit 1
+    fi
+    rm -rf $dir/kern/*
+    set -x
+    pbulk-start-chroot $dir 'pkgin -y update' || true
+    pbulk-start-chroot $dir 'pkgin -y upgrade' || true
+    pbulk-start-chroot $dir 'pkgin -y install fetch' || true
+else
+    printf "Only RHEL/CentOS and NetBSD are supported at this time.\n"
+    exit 1
+fi
+
+# Built pbulk setup in chroot
+cp `which pbulk-setup` $dir
+pbulk-start-chroot $dir ./pbulk-setup

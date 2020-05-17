@@ -1,0 +1,48 @@
+#!/bin/sh -e
+
+
+##########################################################################
+#   Function description:
+#       Pause until user presses return
+##########################################################################
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+make=`pkgsrc-make`
+for mk_conf in `auto-pkgsrc-prefix`/etc/mk.conf /etc/mk.conf; do
+    if [ -e $mk_conf ]; then
+	break
+    fi
+done
+
+if ! fgrep -q PKG_DEVELOPER $mk_conf; then
+    printf "PKG_DEVELOPER not set in $mk_conf.  Stage-qa checks will not be performed.\n"
+    printf "Continue? y/[n] "
+    read continue
+    if [ 0$continue != 0y ]; then
+	exit
+    fi
+fi
+
+printf "Remove distfile? y/[n] "
+read distclean
+if [ 0$distclean = 0y ]; then
+    $make distclean
+else
+    $make clean
+fi
+pkglint -e || true
+pause
+$make deinstall
+$make install
+printf "Clean? y/[n] "
+read clean
+if [ 0$clean = 0y ]; then
+    $make clean
+fi

@@ -1,0 +1,33 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       Show current package vulnerabilities
+#       
+#   History:
+#   Date        Name        Modification
+#   2014-11-21  J Bacon     Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 pkgname\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+if [ -e /var/db/pkg/pkg-vulnerabilities ]; then
+    prefix=/
+else
+    prefix=`auto-pkgsrc-prefix`
+fi
+pkg=$1
+gunzip -c $prefix/var/db/pkg/pkg-vulnerabilities | fgrep $pkg

@@ -1,0 +1,29 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       Add a license to ACCEPTABLE_LICENSES in mk.conf
+#       
+#   History:
+#   Date        Name        Modification
+#   2016-01-05  J Bacon     Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 license\n\nEx. $0 acm-license\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+prefix=`auto-pkgsrc-prefix`
+license=$1
+auto-append-line $license "ACCEPTABLE_LICENSES+=\t$license" $prefix/etc/mk.conf $0

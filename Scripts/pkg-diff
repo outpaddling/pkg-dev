@@ -1,0 +1,48 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2015-09-16  Jasson BaconBegin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 [old-pkg] [category]\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# = 2 ]; then
+    pkg=$1
+    category=$2
+else
+    if [ $# = 0 ]; then
+	pkg=`basename $(pwd)`
+    elif [ $# = 1 ]; then
+	if [ $1 = --help ]; then
+	    usage
+	else
+	    pkg=$1
+	fi
+    else
+	usage
+    fi
+    category=`awk '$1 == "CATEGORIES=" { print $2 }' Makefile`
+    if [ -z $category ]; then
+	printf "No category found in Makefile.  Specify one using $0 category.\n"
+	exit 1
+    fi
+fi
+
+diff -ruN --exclude CVS ../../$category/$pkg .

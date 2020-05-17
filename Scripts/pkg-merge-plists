@@ -1,0 +1,104 @@
+#!/bin/sh
+
+##########################################################################
+#   Script description:
+#       Merge pkgsrc PLIST files.
+#       Lines common to all PLIST files are moved to PLIST.common
+#       and removed from all other files.
+#
+#   Assumption:
+#       All necessary PLIST entries for each platform are in either
+#       PLIST.common or the platform-specific PLIST.  This can be assured
+#       by running "[b]make print-PLIST > PLIST.${OPSYS}" on every OPSYS
+#       prior to using this script.
+#
+#   Arguments:
+#       None.  Automatically processes PLIST.*.
+#
+#   History:
+#   Date        Name        Modification
+#   2017-09-06  J Bacon     Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 \n"
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 0 ]; then
+    usage
+fi
+
+# Make sure EDITOR is set to something
+: ${EDITOR:=vi}
+
+rm -f PLIST.*.new
+platform_plists=$(ls PLIST.* | fgrep -v PLIST.common)
+
+# Every PLIST must begin with a comment
+touch PLIST.common      # May not already exist
+for file in PLIST.*; do
+    printf '@comment $NetBSD$\n' > $file.new
+done
+
+##########################################################################
+# Read through union of all PLISTs one line at a time and if the line is
+# common to *all* PLISTs, move it to to PLIST.common.
+# ( Generate intersection of all PLISTs. )
+# Otherwise, leave it in the platform-specific PLIST.
+##########################################################################
+
+cat PLIST.* | sort | uniq | grep -v '^@comment' | while read line; do
+    # Assume entry is common, then try to disprove it
+    common=1
+
+    # If an entry is not already in the preexisting PLIST.common and
+    # is not in *every* platform-specific PLIST, then it's not common
+    if ! fgrep -qx "$line" PLIST.common; then
+	# Not in PLIST.common.
+	# If missing from any other PLIST, then it's not common.
+	for file in $platform_plists; do
+	    if ! fgrep -qx "$line" $file; then
+		common=0
+	    fi
+	done
+    fi    
+    
+    if [ $common = 1 ]; then
+	echo "$line" >> PLIST.common.new
+    fi
+done
+
+##########################################################################
+#   Once PLIST.common is complete, use it to remove common entries from
+#   platform-specific PLISTs.
+##########################################################################
+
+for file in $platform_plists; do
+    fgrep -xv -f PLIST.common.new $file >> $file.new
+done
+
+$EDITOR *.new
+
+printf "\nLine counts:\n"
+wc -l PLIST.*
+
+printf "Accept new PLIST files? y/[n] "
+read update
+if [ 0$update = 0y ]; then
+    for file in *.new; do
+	mv -f $file ${file%.new}
+    done
+else
+    printf "Remove PLIST.*.new? [y]/n "
+    read remove
+    if [ 0$remove != 0n ]; then
+	rm -f PLIST.*.new
+    fi
+fi

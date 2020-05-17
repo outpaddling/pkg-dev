@@ -1,0 +1,105 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#       
+#   History:
+#   Date        Name        Modification
+#   2017-05-13  root        Begin
+##########################################################################
+
+usage()
+{
+    cat << EOM
+
+Usage: $0 dir ['cmd']
+
+Default cmd is /bin/sh.
+
+Examples:
+    $0 chroot-centos-6
+    $0 chroot-centos-6 /pbulk/bin/bulkbuild
+
+EOM
+    exit 1
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+case $# in
+1)
+    cmd=/bin/sh
+    ;;
+2)
+    cmd="$2"
+    ;;
+*)
+    usage
+esac
+
+dir=$1
+
+if [ ! -d $dir ]; then
+    printf "${dir}: No such directory.\n"
+    exit 1
+fi
+
+umask 022
+
+case `uname` in
+Linux)
+    mount_cmd='mount --bind'
+    ;;
+NetBSD)
+    mount_cmd=mount_null
+    ;;
+FreeBSD)
+    mount_cmd=mount_nullfs
+    ;;
+*)
+    printf "`uname` is not yes supported.\n"
+    exit 1
+esac
+
+mkdir -p $dir/proc $dir/dev
+if [ 0"$(ls $dir/proc)" != 0 ] || [ 0"$(ls $dir/proc)" != 0 ]; then
+    printf "$dir/proc and $dir/dev must be empty for null-mounting.\n"
+    exit 1
+fi
+if [ -e /proc ]; then
+    $mount_cmd /proc $dir/proc
+fi
+$mount_cmd /dev $dir/dev
+if [ `uname` = NetBSD ]; then
+    mkdir -p $dir/kern
+    if [ 0"$(ls $dir/kern)" != 0 ]; then
+	printf "$dir/kern must be empty for null-mounting.\n"
+	exit 1
+    fi
+    $mount_cmd /kern $dir/kern
+fi
+cp -fp /etc/resolv.conf $dir/etc
+
+PATH=/usr/bin:/usr/sbin:/bin:/sbin:/opt/pkg/bin:/opt/pkg/sbin:/usr/pkg/bin:/usr/pkg/sbin
+export PATH
+
+# Make sure umounts happen
+set +e
+
+chroot $dir $cmd
+
+# Unmount in proper order
+if [ `uname` = NetBSD ]; then
+    umount $dir/kern
+fi
+umount $dir/dev
+if [ -e /proc ]; then
+    umount $dir/proc
+fi

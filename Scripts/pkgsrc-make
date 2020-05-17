@@ -1,0 +1,7 @@
+#!/bin/sh -e
+
+if which bmake > /dev/null 2>&1; then
+    printf "bmake\n"
+else
+    printf "make\n"
+fi

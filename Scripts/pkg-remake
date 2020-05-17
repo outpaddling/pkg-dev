@@ -1,0 +1,159 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       Rebuild a package, possibly downloading a new dist and
+#       regenerating plist.
+#
+#   Arguments:
+#       1.  category/package (optional)
+#
+#   History:
+#   Date        Name        Modification
+#   2016        Jason Bacon Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 \n"
+    exit 1
+}
+
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# -gt 1 ]; then
+    usage
+fi
+
+if [ -z $EDITOR ]; then
+    EDITOR=vi
+fi
+
+if [ $# = 1 ]; then
+    cd `auto-pkgsrc-dir`/$1
+fi
+
+pkg_dir=`pwd | awk -F / '{ printf("%s/%s", $(NF-1), $NF); }'`
+pkgbase=`auto-print-make-variable $pkg_dir PKGBASE`
+
+if [ `uname` = 'Darwin' ]; then
+    cat << EOM
+Warning: Running $0 on Darwin may generate .dylib files instead of .so files.
+EOM
+    printf "Continue? (y/[n]) "
+    read continue
+    if [ 0$continue != 0y ]; then
+	exit
+    fi
+fi
+
+if [ -e PLIST.`uname -s` ]; then
+    plist=PLIST.`uname -s`
+else
+    plist=PLIST
+fi
+
+printf "Remove distfile? (y/[n]) "
+read remove_distfile
+
+if [ -d CVS ]; then
+    cvs up -dP
+elif [ -d ../.svn ]; then
+    svn up
+fi
+
+make=`pkgsrc-make`
+
+if [ 0$remove_distfile = 0y ]; then
+    $make distclean
+else
+    $make clean
+fi
+
+rm -f distinfo
+$make distinfo
+
+printf "Regenerate $plist? (y/[n]) "
+read regen_plist
+
+# Remove despite dependencies
+pkg_delete -f $pkgbase
+
+# deinstall as late as possible to minimize uninstalled time
+if [ 0$regen_plist = 0'y' ]; then
+    printf '@comment $NetBSD$\n' > $plist.new
+    # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
+    $make stage-install || true
+    $make print-PLIST > $plist.new
+    pause
+    
+    # Remove items already in PLIST.common
+    if [ -e PLIST.common ]; then
+	printf '@comment $NetBSD$\n' > $plist.tmp
+	fgrep -f PLIST.common -v $plist.new >> $plist.tmp
+	mv -f $plist.tmp $plist.new
+    fi
+    $EDITOR $plist.new
+    
+    if ! diff -u $plist $plist.new; then
+	printf "Install new plist and test package? y/[n] "
+	read new_plist
+	if [ 0$new_plist = 0y ]; then
+	    mv -f $plist.new $plist
+	else
+	    exit 0
+	fi
+	$make clean
+    else
+	printf "No changes to $plist.\n"
+	rm -f $plist.new
+    fi
+fi
+
+cat << EOM
+
+===========================================================================
+Running pkg-check...
+===========================================================================
+
+EOM
+
+# Reinstall if we're remaking pkg-dev or it's dep, auto-admin.
+# We need to run scripts from both packages here.
+basename=`basename $(pwd)`
+if [ $basename = pkg-dev ] || [ $basename = auto-admin ]; then
+    $make reinstall
+fi
+pkg-check
+
+printf "Commit changes to package? y/[n] "
+read commit
+if [ 0$commit = 0y ]; then
+    if [ -d CVS ]; then
+	cvs ci
+    elif [ -d ../.svn ]; then
+	svn ci
+    elif [ -d ../.git ]; then
+	git commit .
+	git pull -r
+	git push
+    fi
+fi
+
+printf "Deinstall? y/[n] "
+read deinstall
+if [ 0$deinstall = 0y ]; then
+    $make deinstall
+fi
