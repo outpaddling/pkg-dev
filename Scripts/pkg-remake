@@ -33,6 +33,11 @@ pause()
 #   Main
 ##########################################################################
 
+if [ 0$1 = 0--no-commit ]; then
+    no_commit=1
+    shift
+fi
+
 if [ $# -gt 1 ]; then
     usage
 fi
@@ -138,17 +143,19 @@ if [ $basename = pkg-dev ] || [ $basename = auto-admin ]; then
 fi
 pkg-check
 
-printf "Commit changes to package? y/[n] "
-read commit
-if [ 0$commit = 0y ]; then
-    if [ -d CVS ]; then
-	cvs ci
-    elif [ -d ../.svn ]; then
-	svn ci
-    elif [ -d ../.git ]; then
-	git commit .
-	git pull -r
-	git push
+if [ 0$no_commit != 01 ]; then
+    printf "Commit changes to package? y/[n] "
+    read commit
+    if [ 0$commit = 0y ]; then
+	if [ -d CVS ]; then
+	    cvs ci
+	elif [ -d ../.svn ]; then
+	    svn ci
+	elif [ -d ../.git ]; then
+	    git commit .
+	    git pull -r
+	    git push
+	fi
     fi
 fi
 
