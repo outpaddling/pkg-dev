@@ -37,7 +37,7 @@ if [ 0$distclean = 0y ]; then
 else
     $make clean
 fi
-pkglint -e || true
+pkglint -Wall -e || true
 pause
 $make deinstall
 $make install
