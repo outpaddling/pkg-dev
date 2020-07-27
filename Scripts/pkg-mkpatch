@@ -65,17 +65,19 @@ cd $WRKSRC
 file1=${filename#./$WRKSRC/}
 file=${file1#$WRKSRC/}
 patch_file='patch-'`echo "$file" | sed -e 's|_|__|g' | sed -e 's|/|_|g'`
-if [ -e $pkg_dir/patches/$patch_file ]; then
-    printf "==================\n"
-    printf "Copy any comments from the original patch file:\n"
-    head -5 $pkg_dir/patches/$patch_file
-    printf "==================\n"
-    pause
+patch_path="$pkg_dir/patches/$patch_file"
+if [ -e $patch_path ]; then
+    pkgdiff "$file.orig" "$file" | \
+	sed -n -e '/^---/,// p' > $patch_path.tail || true
+    sed -n -e '/\$NetBSD/,/^---/ p' $patch_path > $patch_path.head
+    cat $patch_path.head $patch_path.tail | uniq > $patch_path
+    rm -f $patch_path.head $patch_path.tail
+else
+    pkgdiff "$file.orig" "$file" > $patch_path || true
 fi
-pkgdiff "$file.orig" "$file" > $pkg_dir/patches/$patch_file || true
-#${EDITOR:=vi}
+: ${EDITOR:=vi}
 cd $pkg_dir
-vi patches/$patch_file
+$EDITOR $patch_path
 if which bmake; then
     make=bmake
 else
