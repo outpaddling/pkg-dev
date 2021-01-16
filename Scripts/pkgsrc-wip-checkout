@@ -7,6 +7,8 @@ if [ 0$username = 0 ]; then
 else
     git clone $username@wip.pkgsrc.org:/pkgsrc-wip wip
 fi
+cd wip
+git config pull.rebase true
 
 printf "\nEditing .gitconfig.\n\n"
 

@@ -78,9 +78,5 @@ fi
 : ${EDITOR:=vi}
 cd $pkg_dir
 $EDITOR $patch_path
-if which bmake; then
-    make=bmake
-else
-    make=make
-fi
+make=$(pkgsrc-make)
 $make makepatchsum

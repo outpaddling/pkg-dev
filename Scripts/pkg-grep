@@ -2,15 +2,14 @@
 
 ##########################################################################
 #   Script description:
-#       Search files in pkgsrc frameworks.
+#       Search files in ports/pkgsrc frameworks.
 #
 #   Note:
-#       Keep in sync with port-grep!
+#       Keep port-grep and pkg-grep in sync!
 #
 #   Arguments:
-#       -p pkgsrc-dir (default /usr/ports)
+#       -p prefix (default /usr/ports or /usr/pkgsrc)
 #       -f file (default Makefile)
-#       -v (echo categories during search)
 #
 #   History:
 #   Date        Name        Modification
@@ -19,7 +18,7 @@
 
 usage()
 {
-    printf "Usage: $0 [-p pkgsrc-dir] [-f file] [-v] regular-expression [grep flags]\n"
+    printf "Usage: $0 [-p prefix] [-f file] regular-expression [grep flags]\n"
     exit 1
 }
 
@@ -28,7 +27,11 @@ usage()
 #   Main
 ##########################################################################
 
-pkgsrc=`auto-pkgsrc-dir`
+if [ `basename $0` = port-grep ]; then
+    prefix=/usr/ports
+else
+    prefix=$(auto-pkgsrc-dir)
+fi
 
 # Overwrite later if provided as an argument
 filename='Makefile'
@@ -36,17 +39,13 @@ filename='Makefile'
 while [ 0`echo $1 | cut -c 1-1` = 0'-' ]; do
     case "$1" in
     -p)
-	pkgsrc=$2
+	prefix=$2
 	shift
 	shift
 	;;
     -f)
 	filename="$2"
 	shift
-	shift
-	;;
-    -v)
-	verbose=1
 	shift
 	;;
     *)
@@ -64,12 +63,4 @@ shift
 grep_flags="$@"
 
 set +e
-cd $pkgsrc
-for category in *; do
-    if [ -e $category/Makefile ] && [ $category != Templates ]; then
-	if [ 0$verbose = 01 ]; then
-	    printf "Searching $category...\n"
-	fi
-	grep $grep_flags "$re" $category/*/$filename
-    fi
-done
+find $prefix -name $filename -depth 3 | xargs grep $grep_flags "$re"
