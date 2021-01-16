@@ -63,4 +63,5 @@ shift
 grep_flags="$@"
 
 set +e
-find $prefix -name $filename -depth 3 | xargs grep $grep_flags "$re"
+find $prefix -mindepth 3 -maxdepth 3 -name $filename \
+    | xargs grep $grep_flags "$re"
