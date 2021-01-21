@@ -21,7 +21,7 @@ for mk_conf in `auto-pkgsrc-prefix`/etc/mk.conf /etc/mk.conf; do
     fi
 done
 
-if ! fgrep -q PKG_DEVELOPER $mk_conf; then
+if ! grep -q ^PKG_DEVELOPER $mk_conf; then
     printf "PKG_DEVELOPER not set in $mk_conf.  Stage-qa checks will not be performed.\n"
     printf "Continue? y/[n] "
     read continue
