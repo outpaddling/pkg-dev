@@ -1,0 +1,70 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Script description:
+#       Add a package to wip
+#       
+#   History:
+#   Date        Name        Modification
+#   2021-05-02  ,,,         Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 package-name\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Function description:
+#       Pause until user presses return
+##########################################################################
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+pkg=$1
+
+if [ ! -e $pkg ]; then
+    printf "$0: $pkg must exist in CWD.\n"
+    exit 1
+fi
+
+cd $pkg
+sbmake clean
+ls
+cd ..
+read -p "Are all extraneous files removed? y/[n] " clean
+if [ 0$clean != 0y ]; then
+    exit
+fi
+
+awk -v pkg=$pkg '$1 == "COMMENT=" { $1=""; printf("%s: %s\n\n", pkg, $0) }' $pkg/Makefile
+cat $pkg/DESCR
+printf "\nCopy the comment above for the commit.\n\n"
+pause
+
+git add $pkg
+pkglint -F
+grep -C 1 $pkg Makefile
+
+read -p 'OK to commit? y/[n] ' push
+if [ 0$push = 0y ]; then
+    git commit Makefile $pkg
+    git pull -r
+    git push
+fi
