@@ -113,13 +113,20 @@ if [ 0$regen_plist = 0'y' ]; then
     $EDITOR $plist.new
     
     if ! diff -u $plist $plist.new; then
-	printf "Install new plist and test package? y/[n] "
-	read new_plist
-	if [ 0$new_plist = 0y ]; then
-	    mv -f $plist.new $plist
-	else
-	    exit 0
-	fi
+	while [ 0$new_plist != 0i ]; do
+	    printf "(i)nstall new plist (e)dit (a)bort "
+	    read new_plist
+	    if [ 0$new_plist = 0i ]; then
+		mv -f $plist.new $plist
+	    elif [ 0$new_plist = 0e ]; then
+		$EDITOR $plist.new
+		diff -u $plist $plist.new || true
+	    elif [ 0$new_plist = 0a ]; then
+		exit 0
+	    else
+		printf "Invalid selection.\n"
+	    fi
+	done
 	$make clean
     else
 	printf "No changes to $plist.\n"
