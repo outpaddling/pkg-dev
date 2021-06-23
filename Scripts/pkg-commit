@@ -59,14 +59,15 @@ if [ 0"$proceed" = 0y ]; then
     pause
     
     ctype=0
-    while [ $ctype != 1 ] && [ $ctype != 2 ]; do
+    while [ 0$ctype != 01 ] && [ 0$ctype != 02 ] && [ 0$ctype != 03 ]; do
 	cat << EOM
 
-1.. Addition
-2.. Update
+1.. Added
+2.. Updated
+3.. No interesting version change, skip changes entry
 
 EOM
-	read -p 'Add (1) or update (2)? ' ctype
+	read -p 'Add (1)  Update (2)  No changes entry (3) ? ' ctype
 	case $ctype in
 	1)
 	    sbmake cce CTYPE=Added
@@ -79,8 +80,11 @@ EOM
 	    sbmake cce CTYPE=Updated
 	    ;;
 	
+	3)
+	    ;;
+	
 	*)
-	    printf "Please select 1 or 2.\n"
+	    printf "Please select 1, 2, or 3.\n"
 	    ;;
 	
 	esac
