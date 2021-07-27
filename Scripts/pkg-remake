@@ -102,6 +102,9 @@ if [ 0$regen_plist = 0'y' ]; then
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
     $make stage-install || true
     $make print-PLIST > $plist.new
+    if [ -e files/plist-mods.sh ]; then
+	sh files/plist-mods.sh
+    fi
     pause
     
     # Remove items already in PLIST.common
