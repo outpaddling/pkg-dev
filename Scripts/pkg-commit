@@ -41,7 +41,7 @@ if [ $# != 1 ]; then
 fi
 pkg=$1
 
-cd $(pkgsrc-dir)/$pkg
+cd $(auto-pkgsrc-dir)/$pkg
 pwd
 
 cvs-status
