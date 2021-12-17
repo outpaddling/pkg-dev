@@ -50,8 +50,11 @@ pause
 cvs -q diff -u 2>&1 | more
 pause
 
-pkg-check
-pause
+read -p 'Run pkg-check? [y]/n ' check
+if [ 0"$check" != 0n ]; then
+    pkg-check
+    pause
+fi
 
 read -p 'Proceed with commit? y/[n] ' proceed
 if [ 0"$proceed" = 0y ]; then
