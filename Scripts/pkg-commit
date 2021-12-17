@@ -60,7 +60,8 @@ read -p 'Proceed with commit? y/[n] ' proceed
 if [ 0"$proceed" = 0y ]; then
     cvs commit
     pause
-    
+
+    # Update CHANGES and TODO
     ctype=0
     while [ 0$ctype != 01 ] && [ 0$ctype != 02 ] && [ 0$ctype != 03 ]; do
 	cat << EOM
