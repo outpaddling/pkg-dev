@@ -54,7 +54,7 @@ fi
 pkg_dir=`pwd`
 grandparent=${pkg_dir%/*/*}
 package=${pkg_dir#$grandparent/}
-WRKSRC=`auto-print-make-variable -p $grandparent $package WRKSRC`
+WRKSRC=`auto-print-make-variable --base-dir $grandparent $package WRKSRC`
 # Get relative path
 WRKSRC=${WRKSRC#$pkg_dir/}
 
