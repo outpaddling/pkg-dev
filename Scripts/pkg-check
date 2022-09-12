@@ -32,15 +32,24 @@ fi
 
 printf "Remove distfile? y/[n] "
 read distclean
-if [ 0$distclean = 0y ]; then
-    $make distclean
+if [ 0$distclean = 0y ]; then $make distclean
 else
     $make clean
 fi
 pkglint -Wall -e || true
 pause
 $make deinstall
-$make install
+
+# Remove binary package to force rebuild under bin-install
+cwd=$(pwd)
+parent=$(dirname $cwd)
+category=$(basename $parent)
+pkg=$(basename $cwd)
+pkg_name=$(auto-print-make-variable $category/$pkg PKGBASE)
+rm -f $(auto-pkgsrc-dir)/packages/All/$pkg_name-*
+
+# Rebuild, installing deps from binary packages if available
+$make bin-install
 printf "Clean? y/[n] "
 read clean
 if [ 0$clean = 0y ]; then

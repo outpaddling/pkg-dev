@@ -1,0 +1,86 @@
+#!/bin/sh -e
+
+##########################################################################
+#   Synopsis:
+#       
+#   Description:
+#       
+#   Arguments:
+#       
+#   Returns:
+#
+#   Examples:
+#
+#   Files:
+#
+#   Environment:
+#
+#   See also:
+#       
+#   History:
+#   Date        Name        Modification
+#   2022-09-12  ,,,         Begin
+##########################################################################
+
+usage()
+{
+    printf "Usage: $0 category/pkg\n"
+    exit 1
+}
+
+
+##########################################################################
+#   Function description:
+#       Pause until user presses return
+##########################################################################
+
+pause()
+{
+    local junk
+    
+    printf "Press return to continue..."
+    read junk
+}
+
+
+##########################################################################
+#   Main
+##########################################################################
+
+if [ $# != 1 ]; then
+    usage
+fi
+
+cat << EOM
+
+******************************** WARNING ********************************
+This will remove ALL installed packages except for the most basic pkgsrc
+tools such as pkg_install, cwrappers, etc.
+*************************************************************************
+
+EOM
+printf "Continue? yes/[no] "
+read continue
+if [ 0$continue != 0yes ]; then
+    exit
+fi
+
+# Do before removing auto-admin
+pkgsrc_dir=$(auto-pkgsrc-dir)
+pkg_name=$(auto-print-make-variable $1 PKGBASE)
+yes n | auto-clean-pkgsrc
+
+# Remove all packages to ensure the we fully test dependencies
+auto-pkgsrc-delete-all || true
+
+# Remove binary package to force build under bin-install
+rm -r $pkgsrc_dir/packages/*/$pkg_name-*
+
+# Test pkg build with no deps installed
+cd $pkgsrc_dir/$1
+sbmake bin-install
+
+# Restore pkg-dev, of which this script is part
+# This will also pull in auto-admin
+cd $pkgsrc_dir/wip/pkg-dev
+sbmake bin-install
