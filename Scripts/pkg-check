@@ -38,7 +38,6 @@ else
 fi
 pkglint -Wall -e || true
 pause
-$make deinstall
 
 # Remove binary package to force rebuild under bin-install
 cwd=$(pwd)
@@ -47,6 +46,9 @@ category=$(basename $parent)
 pkg=$(basename $cwd)
 pkg_name=$(auto-print-make-variable $category/$pkg PKGBASE)
 rm -f $(auto-pkgsrc-dir)/packages/All/$pkg_name-*
+
+# Do this after auto-print-make-variable in case pkg is auto-admin
+$make deinstall
 
 # Rebuild, installing deps from binary packages if available
 $make bin-install
