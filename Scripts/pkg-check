@@ -8,8 +8,6 @@
 
 pause()
 {
-    local junk
-    
     printf "Press return to continue..."
     read junk
 }
