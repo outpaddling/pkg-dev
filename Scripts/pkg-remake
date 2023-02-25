@@ -95,6 +95,7 @@ read regen_plist
 pkg_delete -f $pkgbase
 
 # deinstall as late as possible to minimize uninstalled time
+plist_changed=false
 if [ 0$regen_plist = 0'y' ]; then
     printf '@comment $NetBSD$\n' > $plist.new
     # If PKG_DEVELOPER=yes, make install will fail on incorrect PLIST
@@ -129,6 +130,7 @@ if [ 0$regen_plist = 0'y' ]; then
 	    fi
 	done
 	$make clean
+	plist_changed=true
     else
 	printf "No changes to $plist.\n"
 	rm -f $plist.new
@@ -149,7 +151,12 @@ basename=`basename $(pwd)`
 if [ $basename = pkg-dev ] || [ $basename = auto-admin ]; then
     $make reinstall
 fi
-pkg-check
+if [ $plist_changed = true ]; then
+    pkg-check
+else
+    pkglint -Wall -e
+    $make clean clean-depends
+fi
 
 if [ 0$no_commit != 01 ]; then
     printf "Commit changes to package? y/[n] "
