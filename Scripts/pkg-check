@@ -46,7 +46,8 @@ pkg_name=$(auto-print-make-variable $category/$pkg PKGBASE)
 rm -f $(auto-pkgsrc-dir)/packages/All/$pkg_name-*
 
 # Do this after auto-print-make-variable in case pkg is auto-admin
-$make deinstall
+# $make deinstall will fail if there are dependents
+pkg_delete -f $pkg_name || true
 
 # Rebuild, installing deps from binary packages if available
 $make bin-install
