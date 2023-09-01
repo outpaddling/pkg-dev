@@ -28,6 +28,12 @@ if ! grep -q ^PKG_DEVELOPER $mk_conf; then
     fi
 fi
 
+max_len=$(awk '{ print length }' DESCR | sort -n | tail -1)
+if [ $max_len -gt 70 ]; then
+    printf "DESCR has lines longer than 70 chars.\n"
+    exit 1
+fi
+
 printf "Remove distfile? y/[n] "
 read distclean
 if [ 0$distclean = 0y ]; then $make distclean
