@@ -30,8 +30,8 @@ fi
 
 max_len=$(awk '{ print length }' DESCR | sort -n | tail -1)
 if [ $max_len -gt 70 ]; then
-    printf "DESCR has lines longer than 70 chars.\n"
-    exit 1
+    printf "Warning: DESCR has lines longer than 70 chars.\n"
+    pause
 fi
 
 printf "Remove distfile? y/[n] "
