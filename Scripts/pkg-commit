@@ -48,8 +48,8 @@ pause
 cvs -q diff -u 2>&1 | more
 pause
 
-read -p 'Run pkg-check? [y]/n ' check
-if [ 0"$check" != 0n ]; then
+read -p 'Run pkg-check? y/[n] ' check
+if [ 0"$check" = y ]; then
     pkg-check
     pause
 fi
@@ -61,6 +61,10 @@ if [ 0"$proceed" = 0y ]; then
     grep '^COMMENT' Makefile | cut -f 2-
     printf "\n"
     cat DESCR
+    
+    printf "\nIf this is an update, copy the text below for the commmit message:\n\n"
+    printf "${pkg}: Update to "
+    auto-print-make-variable $pkg PKGVERSION
     pause
 
     cvs commit
