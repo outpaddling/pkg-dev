@@ -49,7 +49,7 @@ cvs -q diff -u 2>&1 | more
 pause
 
 read -p 'Run pkg-check? y/[n] ' check
-if [ 0"$check" = y ]; then
+if [ 0"$check" = 0y ]; then
     pkg-check
     pause
 fi
