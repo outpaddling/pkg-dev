@@ -56,6 +56,7 @@ rm -f $(auto-pkgsrc-dir)/packages/All/$pkg_name-*
 pkg_delete -f $pkg_name || true
 
 # Rebuild, installing deps from binary packages if available
+$make   # Separate step to ensure work directory is created
 $make bin-install
 printf "Clean? y/[n] "
 read clean
