@@ -23,6 +23,11 @@ usage()
 #   Main
 ##########################################################################
 
+if [ 0$1 = 0--exact ]; then
+    exact=1
+    shift
+fi
+
 case $# in
 1)
     pkgsrc=`auto-pkgsrc-dir`
@@ -34,4 +39,8 @@ case $# in
     ;;
 esac
 
-ls -d "$pkgsrc"/*/*$pattern*
+if [ 0$exact = 01 ]; then
+    ls -d "$pkgsrc"/*/$pattern
+else
+    ls -d "$pkgsrc"/*/*$pattern*
+fi
