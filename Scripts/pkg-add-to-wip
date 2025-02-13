@@ -44,6 +44,7 @@ fi
 
 cd $pkg
 sbmake clean
+rm -rf CVS
 ls
 cd ..
 read -p "Are all extraneous files removed? y/[n] " clean
