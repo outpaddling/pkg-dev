@@ -39,14 +39,28 @@ if [ $# != 1 ]; then
 fi
 pkg=$1
 
-cd $(auto-pkgsrc-dir)/$pkg
+cd $(auto-pkgsrc-dir)
+if [ -e CVS ]; then
+    vcs=cvs
+elif [ -e .git ]; then
+    vcs=git
+else
+    printf "Not a cvs or git repo.\n"
+    exit 1
+fi
+
+cd $pkg
 pwd
 
-cvs-status
-pause
-
-cvs -q diff -u 2>&1 | more
-pause
+if [ $vcs = cvs ]; then
+    cvs-status
+    cvs -q diff -u 2>&1 | more
+    pause
+else
+    git status -s .
+    git diff .
+    pause
+fi
 
 read -p 'Run pkg-check? y/[n] ' check
 if [ 0"$check" = 0y ]; then
@@ -65,40 +79,55 @@ if [ 0"$proceed" = 0y ]; then
     printf "\nIf this is an update, copy the text below for the commmit message:\n\n"
     printf "${pkg}: Update to "
     auto-print-make-variable $pkg PKGVERSION
+    printf "Remove the category for dreckly commits.\n"
     pause
 
-    cvs commit
-    pause
+    if [ $vcs = cvs ]; then
+	cvs commit
+	pause
+	
+	ctype=0
+	while [ 0$ctype != 01 ] && [ 0$ctype != 02 ] && [ 0$ctype != 03 ]; do
+	    cat << EOM
     
-    ctype=0
-    while [ 0$ctype != 01 ] && [ 0$ctype != 02 ] && [ 0$ctype != 03 ]; do
-	cat << EOM
-
 1.. Added
 2.. Updated
 3.. No interesting version change, skip changes entry
 
 EOM
-	read -p 'Add (1)  Update (2)  No changes entry (3) ? ' ctype
-	case $ctype in
-	1)
-	    sbmake cce CTYPE=Added
-	    cd ..
-	    pkglint -F
-	    cvs commit Makefile
-	    ;;
-	
-	2)
-	    sbmake cce CTYPE=Updated
-	    ;;
-	
-	3)
-	    ;;
-	
-	*)
-	    printf "Please select 1, 2, or 3.\n"
-	    ;;
-	
-	esac
-    done
+	    read -p 'Add (1)  Update (2)  No changes entry (3) ? ' ctype
+	    case $ctype in
+	    1)
+		sbmake cce CTYPE=Added
+		cd ..
+		pkglint -F
+		cvs commit Makefile
+		;;
+	    
+	    2)
+		sbmake cce CTYPE=Updated
+		;;
+	    
+	    3)
+		;;
+	    
+	    *)
+		printf "Please select 1, 2, or 3.\n"
+		;;
+	    
+	    esac
+	done
+    else    # git
+	cd $(auto-pkgsrc-dir)/$pkg/..
+	pwd
+	pkg_name=${pkg#*/}
+	set -x
+	git commit $pkg_name Makefile
+	git status
+
+	read -p 'Push commits? y/[n] ' push
+	if [ 0$push = 0y ]; then
+	    git push
+	fi
+    fi
 fi
