@@ -76,8 +76,13 @@ if [ 0"$proceed" = 0y ]; then
     printf "\n"
     cat DESCR
     
+    if [ $vcs = cvs]; then
+	commit_name=${pkg}
+    else    # Remove category for dreckly commits
+	commit_name=${pkg#*/}
+    fi
     printf "\nIf this is an update, copy the text below for the commmit message:\n\n"
-    printf "${pkg}: Update to "
+    printf "${commit_name}: Update to "
     auto-print-make-variable $pkg PKGVERSION
     printf "Remove the category for dreckly commits.\n"
     pause
@@ -121,7 +126,6 @@ EOM
 	cd $(auto-pkgsrc-dir)/$pkg/..
 	pwd
 	pkg_name=${pkg#*/}
-	set -x
 	git commit $pkg_name Makefile
 	git status
 
